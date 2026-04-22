@@ -2,120 +2,618 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>خدمة إنشاء المواقع</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>صندوق محمدو أبكير – إدارة التبرعات</title>
+    <!-- Bootstrap 5 RTL -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- مكتبات التصدير -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
-        :root {
-            --primary-color: #1a237e; /* أزرق داكن */
-            --secondary-color: #ffd700; /* أصفر */
-            --text-color: #ffffff;
-            --bg-color: #f8f8f8;
-        }
-
         body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--primary-color);
+            background: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            padding-bottom: 20px;
         }
-
-        header {
-            background-color: var(--primary-color);
-            color: var(--text-color);
-            text-align: center;
-            padding: 30px 10px;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 2rem;
-        }
-
-        main {
-            padding: 20px;
-            max-width: 800px;
-            margin: auto;
-        }
-
-        h2 {
-            color: var(--primary-color);
-        }
-
-        p {
-            line-height: 1.6;
-        }
-
-        .price {
-            font-size: 1.5rem;
+        .navbar-brand {
             font-weight: bold;
-            color: var(--secondary-color);
+            color: #2c3e50 !important;
         }
-
-        .contact {
-            background-color: var(--primary-color);
-            color: var(--text-color);
+        .card {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
             padding: 20px;
+            border-radius: 20px;
             text-align: center;
-            margin-top: 40px;
-            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: transform 0.2s;
+            border: 1px solid rgba(0,0,0,0.03);
         }
-
-        .btn {
-            display: inline-block;
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-icon { font-size: 2.5rem; color: #0d6efd; margin-bottom: 10px; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: #1e293b; }
+        .badge-paid { background-color: #10b981; color: white; padding: 6px 12px; border-radius: 30px; }
+        .badge-unpaid { background-color: #ef4444; color: white; padding: 6px 12px; border-radius: 30px; }
+        .table th { background-color: #f8fafc; color: #334155; font-weight: 600; }
+        .btn-soft { border-radius: 30px; padding: 8px 18px; }
+        .login-container {
+            max-width: 400px;
+            margin: 80px auto;
+        }
+        .app-container {
+            display: none;
+        }
+        .lang-switch {
+            cursor: pointer;
+            margin: 0 8px;
+            color: #2563eb;
+        }
+        .footer-dev {
+            margin-top: 30px;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        .search-box {
+            border-radius: 40px;
+            padding-left: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 40px;
+        }
+        .nav-pills .nav-link {
+            color: #1e293b;
+            border-radius: 40px;
             padding: 10px 20px;
-            background-color: var(--secondary-color);
-            color: var(--primary-color);
+        }
+        .alert-warning-light {
+            background-color: #fff3cd;
+            border-left: 6px solid #f59e0b;
+        }
+        /* تحسينات للجوال */
+        @media (max-width: 576px) {
+            .stat-value { font-size: 1.5rem; }
+            .btn-group-mobile { display: flex; flex-wrap: wrap; gap: 5px; }
+        }
+        .blink-warning {
+            animation: softBlink 1.5s infinite;
+            font-weight: 500;
+        }
+        @keyframes softBlink {
+            0% { background-color: #fff3cd; }
+            50% { background-color: #ffe5b4; }
+            100% { background-color: #fff3cd; }
+        }
+        .share-buttons a {
+            margin: 0 5px;
+            color: white;
             text-decoration: none;
-            border-radius: 5px;
-            margin-top: 10px;
         }
-
-        .btn:hover {
-            opacity: 0.8;
-        }
-
-        footer {
-            text-align: center;
-            padding: 10px;
-            color: var(--primary-color);
-            margin-top: 20px;
+        .danger-zone {
+            border: 1px dashed #dc3545;
+            border-radius: 20px;
+            padding: 20px;
+            background-color: #fff8f8;
         }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>خدمة إنشاء المواقع</h1>
-</header>
-
-<main>
-    <h2>حول الخدمة</h2>
-    <p>
-        نقدم لك خدمة متكاملة لإنشاء موقعك الخاص على الإنترنت بسرعة وسهولة، مع تصميم بسيط وجذاب، وتواصل مباشر للحصول على موقعك خلال وقت قصير.
-    </p>
-
-    <h2>التكلفة ومدة التنفيذ</h2>
-    <p class="price">السعر: 300 أوقية موريتانية</p>
-    <p>مدة التنفيذ: حتى 12 ساعة ⌚️ بعد استلام الدفع.</p>
-
-    <h2>طريقة الدفع</h2>
-    <p>الدفع عبر حساب <strong>بنكلي</strong>:</p>
-    <ul>
-        <li>رقم الدفع: 26361821</li>
-    </ul>
-
-    <h2>التواصل</h2>
-    <p>للطلب أو الاستفسار، يمكنك التواصل عبر الرقم أعلاه.</p>
-</main>
-
-<div class="contact">
-    <p>ابدأ الآن واحصل على موقعك الخاص خلال 12 ساعة!</p>
-    <a href="tel:+26361821" class="btn">اتصل الآن</a>
+<!-- شاشة تسجيل الدخول -->
+<div id="loginScreen" class="container login-container">
+    <div class="card p-4">
+        <h3 class="text-center mb-4"><i class="fas fa-hand-holding-heart me-2"></i>صندوق محمدو أبكير</h3>
+        <div class="text-center mb-3">
+            <span class="lang-switch" onclick="toggleLanguage('ar')">🇲🇷 العربية</span> |
+            <span class="lang-switch" onclick="toggleLanguage('fr')">🇫🇷 Français</span>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" id="lblPassword">كلمة المرور</label>
+            <input type="password" id="passwordInput" class="form-control text-center" placeholder="••••••••">
+        </div>
+        <button class="btn btn-primary w-100" onclick="login()"><i class="fas fa-lock-open me-2"></i><span id="btnLoginText">دخول</span></button>
+        <p class="text-muted mt-3 text-center small">(كلمة المرور الافتراضية: 1234)</p>
+        <div class="footer-dev mt-4">
+            👨‍💻 أج بن صدفي آجمار<br>
+            📧 ajeajmar66@gmail.com | 📞 26361821 / 43162663
+        </div>
+    </div>
 </div>
 
-<footer>
-    <p>&copy; 2025 خدمة إنشاء المواقع</p>
-</footer>
+<!-- التطبيق الرئيسي -->
+<div id="appScreen" class="app-container container-fluid px-3 px-md-4">
+    <!-- شريط التنقل -->
+    <nav class="navbar navbar-expand-lg bg-white rounded-4 shadow-sm px-3 py-2 mb-4 mt-2">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><i class="fas fa-mosque me-2"></i>صندوق محمدو أبكير</a>
+            <div class="d-flex align-items-center">
+                <span class="me-3 d-none d-md-block"><i class="fas fa-user-shield"></i> <span id="currentUserLabel">المدير</span></span>
+                <button class="btn btn-outline-danger btn-sm rounded-pill" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span class="d-none d-sm-inline">خروج</span></button>
+            </div>
+        </div>
+    </nav>
 
+    <!-- لوحة التحكم -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-value" id="totalSubscribers">0</div>
+                <div class="text-muted">مشترك</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-check-circle text-success"></i></div>
+                <div class="stat-value" id="totalPaid">0</div>
+                <div class="text-muted">مسدد</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-exclamation-circle text-danger"></i></div>
+                <div class="stat-value" id="totalUnpaid">0</div>
+                <div class="text-muted">متأخر</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-coins text-warning"></i></div>
+                <div class="stat-value" id="totalAmount">0</div>
+                <div class="text-muted">إجمالي (أوقية)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- علامات التبويب -->
+    <ul class="nav nav-pills mb-4 justify-content-center flex-wrap" id="mainTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="subscribers-tab" data-bs-toggle="pill" data-bs-target="#subscribers" type="button" role="tab"><i class="fas fa-list me-1"></i> المشتركين</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="donations-tab" data-bs-toggle="pill" data-bs-target="#donations" type="button" role="tab"><i class="fas fa-hand-holding-usd me-1"></i> التبرعات</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="reports-tab" data-bs-toggle="pill" data-bs-target="#reports" type="button" role="tab"><i class="fas fa-file-alt me-1"></i> التقارير</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings" type="button" role="tab"><i class="fas fa-cog me-1"></i> الإعدادات</button>
+        </li>
+    </ul>
+
+    <!-- محتوى التبويبات -->
+    <div class="tab-content">
+        <!-- تبويب المشتركين -->
+        <div class="tab-pane fade show active" id="subscribers" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                        <h5 class="mb-2"><i class="fas fa-user-plus me-2"></i>إدارة المشتركين</h5>
+                        <button class="btn btn-primary btn-soft" onclick="showAddSubscriberModal()"><i class="fas fa-plus"></i> إضافة مشترك</button>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <input type="text" id="searchSubscriber" class="form-control search-box" placeholder="🔍 بحث عن اسم...">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="subscribersTable">
+                            <thead>
+                                <tr><th>#</th><th>الاسم الكامل</th><th>عدد التبرعات</th><th>الإجراءات</th></tr>
+                            </thead>
+                            <tbody id="subscribersList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- تبويب التبرعات -->
+        <div class="tab-pane fade" id="donations" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                        <h5><i class="fas fa-calendar-alt me-2"></i>تسجيل تبرع جديد (دورة 6 أشهر)</h5>
+                        <button class="btn btn-success btn-soft" onclick="showAddDonationModal()"><i class="fas fa-plus-circle"></i> تسجيل تبرع</button>
+                    </div>
+                    <div class="alert alert-warning-light p-3 mb-3 d-flex align-items-center blink-warning">
+                        <i class="fas fa-bell me-3 fa-lg"></i>
+                        <span id="lateAlertMessage">يوجد متأخرين عن السداد، يرجى المتابعة.</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="donationsTable">
+                            <thead><tr><th>المشترك</th><th>المبلغ</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+                            <tbody id="donationsList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- تبويب التقارير -->
+        <div class="tab-pane fade" id="reports" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="fas fa-chart-bar me-2"></i>التقارير والتصدير</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <button class="btn btn-outline-danger w-100" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-outline-success w-100" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+                        </div>
+                        <div class="col-12">
+                            <hr>
+                            <label class="fw-bold mb-2">مشاركة سريعة:</label>
+                            <div class="share-buttons">
+                                <a href="#" class="btn btn-success" onclick="shareViaWhatsApp()"><i class="fab fa-whatsapp"></i> واتساب</a>
+                                <a href="#" class="btn btn-primary" onclick="shareViaFacebook()"><i class="fab fa-facebook"></i> فيسبوك</a>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <div class="border p-3 rounded-3 bg-light">
+                                <h6>معاينة التقرير:</h6>
+                                <pre id="reportPreview" style="max-height:200px; overflow:auto; background:white; padding:10px; border-radius:10px;">اختر تصدير أو مشاركة</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- تبويب الإعدادات (يحتوي نظام حذف البيانات) -->
+        <div class="tab-pane fade" id="settings" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+                    <h5><i class="fas fa-shield-alt me-2"></i>الأمان والإعدادات</h5>
+                    <div class="mb-4">
+                        <label class="fw-bold">تغيير كلمة المرور</label>
+                        <div class="input-group">
+                            <input type="password" id="newPassword" class="form-control" placeholder="كلمة مرور جديدة">
+                            <button class="btn btn-warning" onclick="changePassword()">تحديث</button>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="danger-zone">
+                        <h6 class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>منطقة الحذف الخطرة</h6>
+                        <p class="small">حذف البيانات لا يمكن التراجع عنه. استخدم بحذر.</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-outline-danger" onclick="deleteSingleSubscriberPrompt()"><i class="fas fa-user-slash"></i> حذف مشترك محدد</button>
+                            <button class="btn btn-outline-danger" onclick="deleteAllDonations()"><i class="fas fa-trash-alt"></i> حذف جميع التبرعات</button>
+                            <button class="btn btn-danger" onclick="deleteAllData()"><i class="fas fa-skull-crossbones"></i> حذف كل البيانات (مشتركين + تبرعات)</button>
+                        </div>
+                        <p class="mt-2 text-muted small">عند حذف مشترك، ستحذف تبرعاته تلقائياً.</p>
+                    </div>
+                    <hr>
+                    <div class="mt-3">
+                        <button class="btn btn-secondary" onclick="resetToSampleData()"><i class="fas fa-database"></i> استعادة بيانات تجريبية</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- تذييل المطور -->
+    <div class="footer-dev">
+        👨‍💻 أج بن صدفي آجمار – ajeajmar66@gmail.com – 26361821 / 43162663
+    </div>
+</div>
+
+<!-- Modal إضافة/تعديل مشترك -->
+<div class="modal fade" id="subscriberModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="subscriberModalTitle">إضافة مشترك</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <input type="hidden" id="editSubscriberId">
+                <div class="mb-3"><label class="form-label">الاسم الكامل</label><input type="text" id="subscriberName" class="form-control" placeholder="أدخل الاسم"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="saveSubscriber()">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal تسجيل تبرع -->
+<div class="modal fade" id="donationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">تسجيل تبرع</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="mb-3"><label class="form-label">المشترك</label><select id="donationSubscriber" class="form-select"></select></div>
+                <div class="mb-3"><label class="form-label">المبلغ (أوقية)</label><input type="number" id="donationAmount" class="form-control" min="1"></div>
+                <div class="mb-3"><label class="form-label">تاريخ الدفع</label><input type="date" id="donationDate" class="form-control"></div>
+                <div class="mb-3"><label class="form-label">الحالة</label><select id="donationStatus" class="form-select"><option value="paid">✅ تم التسديد</option><option value="unpaid">❌ لم يتم التسديد</option></select></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-success" onclick="saveDonation()">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ========== إعدادات اللغة ==========
+    let currentLang = 'ar';
+    const translations = {
+        ar: { password: 'كلمة المرور', login: 'دخول', subscribers: 'المشتركين', donations: 'التبرعات', reports: 'التقارير', settings: 'الإعدادات' },
+        fr: { password: 'Mot de passe', login: 'Connexion', subscribers: 'Abonnés', donations: 'Dons', reports: 'Rapports', settings: 'Paramètres' }
+    };
+    window.toggleLanguage = function(lang) {
+        currentLang = lang;
+        document.getElementById('lblPassword').innerText = translations[lang].password;
+        document.getElementById('btnLoginText').innerText = translations[lang].login;
+        // يمكن توسيعها لبقية النصوص
+    };
+
+    // ========== التخزين المحلي ==========
+    const STORAGE_SUBSCRIBERS = 'bokara_subscribers';
+    const STORAGE_DONATIONS = 'bokara_donations';
+    const STORAGE_PASSWORD = 'bokara_password';
+    let subscribers = [];
+    let donations = [];
+    let appPassword = localStorage.getItem(STORAGE_PASSWORD) || '1234';
+
+    // ========== دوال المساعدة ==========
+    function saveData() {
+        localStorage.setItem(STORAGE_SUBSCRIBERS, JSON.stringify(subscribers));
+        localStorage.setItem(STORAGE_DONATIONS, JSON.stringify(donations));
+    }
+    function loadData() {
+        subscribers = JSON.parse(localStorage.getItem(STORAGE_SUBSCRIBERS)) || [];
+        donations = JSON.parse(localStorage.getItem(STORAGE_DONATIONS)) || [];
+        if (subscribers.length === 0) resetToSampleData(false); // بيانات افتراضية
+    }
+
+    // ========== تسجيل الدخول ==========
+    window.login = function() {
+        const pwd = document.getElementById('passwordInput').value;
+        if (pwd === appPassword) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'block';
+            loadData();
+            renderAll();
+        } else {
+            alert(currentLang === 'ar' ? 'كلمة المرور غير صحيحة' : 'Mot de passe incorrect');
+        }
+    };
+    window.logout = function() {
+        document.getElementById('appScreen').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'block';
+        document.getElementById('passwordInput').value = '';
+    };
+
+    // ========== عرض الواجهات ==========
+    function renderAll() {
+        renderDashboard();
+        renderSubscribersTable();
+        renderDonationsTable();
+        populateSubscriberSelect();
+        updateLateAlert();
+    }
+    function renderDashboard() {
+        const totalSubs = subscribers.length;
+        const paidCount = donations.filter(d => d.status === 'paid').length;
+        const unpaidCount = donations.filter(d => d.status === 'unpaid').length;
+        const totalAmount = donations.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
+        document.getElementById('totalSubscribers').innerText = totalSubs;
+        document.getElementById('totalPaid').innerText = paidCount;
+        document.getElementById('totalUnpaid').innerText = unpaidCount;
+        document.getElementById('totalAmount').innerText = totalAmount.toLocaleString();
+    }
+    function renderSubscribersTable(filterText = '') {
+        const tbody = document.getElementById('subscribersList');
+        const search = document.getElementById('searchSubscriber')?.value.toLowerCase() || '';
+        const filtered = subscribers.filter(s => s.name.toLowerCase().includes(search));
+        tbody.innerHTML = '';
+        filtered.forEach((sub, index) => {
+            const subDonations = donations.filter(d => d.subscriberId === sub.id);
+            const row = `<tr>
+                <td>${index+1}</td>
+                <td>${sub.name}</td>
+                <td>${subDonations.length}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editSubscriber('${sub.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteSubscriberById('${sub.id}')"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+    function renderDonationsTable() {
+        const tbody = document.getElementById('donationsList');
+        tbody.innerHTML = '';
+        donations.sort((a,b)=> new Date(b.date) - new Date(a.date)).forEach(d => {
+            const sub = subscribers.find(s=>s.id===d.subscriberId) || {name:'(محذوف)'};
+            const statusBadge = d.status === 'paid' ? '<span class="badge-paid">✅ مسدد</span>' : '<span class="badge-unpaid">❌ غير مسدد</span>';
+            tbody.innerHTML += `<tr>
+                <td>${sub.name}</td><td>${d.amount}</td><td>${d.date}</td><td>${statusBadge}</td>
+                <td><button class="btn btn-sm btn-outline-warning" onclick="toggleDonationStatus('${d.id}')"><i class="fas fa-sync-alt"></i></button></td>
+            </tr>`;
+        });
+        updateReportPreview();
+    }
+    function populateSubscriberSelect() {
+        const select = document.getElementById('donationSubscriber');
+        select.innerHTML = '<option value="">-- اختر مشترك --</option>';
+        subscribers.forEach(s => { select.innerHTML += `<option value="${s.id}">${s.name}</option>`; });
+    }
+    function updateLateAlert() {
+        const lateCount = donations.filter(d => d.status === 'unpaid').length;
+        const msg = lateCount > 0 ? `⚠️ يوجد ${lateCount} متأخرين عن السداد` : '✅ جميع التبرعات مسددة';
+        document.getElementById('lateAlertMessage').innerText = msg;
+    }
+
+    // ========== إدارة المشتركين ==========
+    window.showAddSubscriberModal = function() {
+        document.getElementById('subscriberModalTitle').innerText = 'إضافة مشترك';
+        document.getElementById('editSubscriberId').value = '';
+        document.getElementById('subscriberName').value = '';
+        new bootstrap.Modal(document.getElementById('subscriberModal')).show();
+    };
+    window.editSubscriber = function(id) {
+        const sub = subscribers.find(s=>s.id===id);
+        if(!sub) return;
+        document.getElementById('subscriberModalTitle').innerText = 'تعديل مشترك';
+        document.getElementById('editSubscriberId').value = id;
+        document.getElementById('subscriberName').value = sub.name;
+        new bootstrap.Modal(document.getElementById('subscriberModal')).show();
+    };
+    window.saveSubscriber = function() {
+        const name = document.getElementById('subscriberName').value.trim();
+        if(!name) return alert('الرجاء إدخال الاسم');
+        const id = document.getElementById('editSubscriberId').value;
+        if(id) {
+            const sub = subscribers.find(s=>s.id===id);
+            if(sub) sub.name = name;
+        } else {
+            subscribers.push({ id: Date.now().toString(), name });
+        }
+        saveData(); renderAll();
+        bootstrap.Modal.getInstance(document.getElementById('subscriberModal')).hide();
+    };
+    window.deleteSubscriberById = function(id) {
+        if(!confirm('هل أنت متأكد من حذف هذا المشترك؟ سيتم حذف جميع تبرعاته أيضاً.')) return;
+        subscribers = subscribers.filter(s=>s.id!==id);
+        donations = donations.filter(d=>d.subscriberId!==id);
+        saveData(); renderAll();
+    };
+
+    // ========== التبرعات ==========
+    window.showAddDonationModal = function() {
+        if(subscribers.length===0) { alert('أضف مشتركين أولاً'); return; }
+        document.getElementById('donationAmount').value = '';
+        document.getElementById('donationDate').value = new Date().toISOString().split('T')[0];
+        populateSubscriberSelect();
+        new bootstrap.Modal(document.getElementById('donationModal')).show();
+    };
+    window.saveDonation = function() {
+        const subId = document.getElementById('donationSubscriber').value;
+        const amount = document.getElementById('donationAmount').value;
+        const date = document.getElementById('donationDate').value;
+        const status = document.getElementById('donationStatus').value;
+        if(!subId || !amount) return alert('جميع الحقول مطلوبة');
+        donations.push({ id: Date.now().toString(), subscriberId: subId, amount: Number(amount), date, status });
+        saveData(); renderAll();
+        bootstrap.Modal.getInstance(document.getElementById('donationModal')).hide();
+    };
+    window.toggleDonationStatus = function(id) {
+        const donation = donations.find(d=>d.id===id);
+        if(donation) donation.status = donation.status === 'paid' ? 'unpaid' : 'paid';
+        saveData(); renderAll();
+    };
+
+    // ========== نظام حذف البيانات (الميزة المضافة) ==========
+    window.deleteSingleSubscriberPrompt = function() {
+        if(subscribers.length===0) { alert('لا يوجد مشتركين'); return; }
+        const list = subscribers.map((s,i)=> `${i+1} - ${s.name}`).join('\n');
+        const input = prompt('أدخل رقم المشترك للحذف (سيتم حذف تبرعاته أيضاً):\n' + list);
+        if(!input) return;
+        const idx = parseInt(input)-1;
+        if(idx>=0 && idx<subscribers.length) {
+            const sub = subscribers[idx];
+            if(confirm(`حذف "${sub.name}" وجميع تبرعاته؟`)) {
+                subscribers.splice(idx,1);
+                donations = donations.filter(d=>d.subscriberId!==sub.id);
+                saveData(); renderAll();
+            }
+        } else { alert('رقم غير صحيح'); }
+    };
+    window.deleteAllDonations = function() {
+        if(!confirm('هل أنت متأكد من حذف جميع التبرعات؟ لا يمكن التراجع.')) return;
+        donations = [];
+        saveData(); renderAll();
+    };
+    window.deleteAllData = function() {
+        if(!confirm('تحذير خطير: سيتم حذف جميع المشتركين والتبرعات نهائياً. متابعة؟')) return;
+        if(!confirm('تأكيد أخير: هل أنت متأكد 100%؟')) return;
+        subscribers = [];
+        donations = [];
+        saveData(); renderAll();
+    };
+    window.resetToSampleData = function(confirmNeeded = true) {
+        if(confirmNeeded && !confirm('استعادة البيانات التجريبية؟ سيتم مسح البيانات الحالية.')) return;
+        subscribers = [
+            { id: '1', name: 'أحمد فال' },
+            { id: '2', name: 'محمد الأمين' },
+            { id: '3', name: 'فاطمة منت اباه' }
+        ];
+        donations = [
+            { id: 'd1', subscriberId: '1', amount: 500, date: '2026-01-15', status: 'paid' },
+            { id: 'd2', subscriberId: '2', amount: 300, date: '2026-02-01', status: 'unpaid' },
+            { id: 'd3', subscriberId: '3', amount: 700, date: '2025-12-10', status: 'paid' }
+        ];
+        saveData(); renderAll();
+    };
+
+    // ========== تصدير ومشاركة ==========
+    function generateReportText() {
+        let text = '📊 تقرير صندوق محمدو أبكير\n';
+        text += `إجمالي المشتركين: ${subscribers.length}\n`;
+        text += `المبلغ الإجمالي: ${donations.reduce((s,d)=>s+d.amount,0)} أوقية\n\n`;
+        donations.forEach(d=>{
+            const sub = subscribers.find(s=>s.id===d.subscriberId) || {name:'?'};
+            text += `${sub.name} - ${d.amount} أوقية - ${d.status==='paid'?'✅':'❌'}\n`;
+        });
+        return text;
+    }
+    window.exportToPDF = function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text('تقرير التبرعات - صندوق محمدو أبكير', 14, 20);
+        const rows = donations.map(d=> [subscribers.find(s=>s.id===d.subscriberId)?.name||'', d.amount, d.date, d.status==='paid'?'مسدد':'غير مسدد'] );
+        doc.autoTable({ head: [['الاسم','المبلغ','التاريخ','الحالة']], body: rows, startY: 30 });
+        doc.save('تقرير_التبرعات.pdf');
+    };
+    window.exportToExcel = function() {
+        const data = donations.map(d=> ({ الاسم: subscribers.find(s=>s.id===d.subscriberId)?.name||'', المبلغ: d.amount, التاريخ: d.date, الحالة: d.status==='paid'?'مسدد':'غير مسدد' }) );
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'التبرعات');
+        XLSX.writeFile(wb, 'تبرعات_بوكعارة.xlsx');
+    };
+    window.updateReportPreview = function() {
+        document.getElementById('reportPreview').innerText = generateReportText();
+    };
+    window.shareViaWhatsApp = function() {
+        const text = encodeURIComponent(generateReportText());
+        window.open(`https://wa.me/?text=${text}`, '_blank');
+    };
+    window.shareViaFacebook = function() {
+        alert('يمكن نسخ التقرير من المعاينة ومشاركته على فيسبوك');
+    };
+    window.changePassword = function() {
+        const newPwd = document.getElementById('newPassword').value;
+        if(newPwd.length<3) return alert('كلمة المرور قصيرة');
+        appPassword = newPwd;
+        localStorage.setItem(STORAGE_PASSWORD, newPwd);
+        alert('تم تحديث كلمة المرور');
+        document.getElementById('newPassword').value = '';
+    };
+
+    // ========== بحث ==========
+    document.addEventListener('DOMContentLoaded', ()=>{
+        document.getElementById('searchSubscriber')?.addEventListener('input', (e)=> renderSubscribersTable(e.target.value));
+    });
+
+    // بدء التشغيل
+    loadData();
+</script>
 </body>
 </html>
