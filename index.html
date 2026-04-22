@@ -101,7 +101,7 @@
                 <div class="table-responsive"><table class="table table-hover"><thead><tr><th>المشترك</th><th>المبلغ</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="donationsList"></tbody></table></div>
             </div></div>
         </div>
-        <!-- التقارير (بدون PDF) -->
+        <!-- التقارير -->
         <div class="tab-pane fade" id="reports">
             <div class="card"><div class="card-body">
                 <h5><i class="fas fa-chart-bar me-2"></i>التقارير والتصدير</h5>
@@ -151,8 +151,8 @@
     let currentLang = 'ar';
     window.toggleLanguage = (lang) => { currentLang = lang; };
 
-    const STORAGE_SUBSCRIBERS = 'bokara_sub_v6';
-    const STORAGE_DONATIONS = 'bokara_don_v6';
+    const STORAGE_SUBSCRIBERS = 'bokara_sub_v7';
+    const STORAGE_DONATIONS = 'bokara_don_v7';
     let subscribers = [];
     let donations = [];
 
@@ -302,16 +302,23 @@
     window.deleteAllData = ()=>{ if(confirm('تحذير: حذف كل المشتركين والتبرعات؟') && confirm('تأكيد نهائي؟')){ subscribers = []; donations = []; saveData(); renderAll(); } };
     window.resetToEmpty = ()=>{ if(confirm('مسح جميع البيانات؟')) { subscribers = []; donations = []; saveData(); renderAll(); } };
 
-    // ---------- تصدير Excel (أرقام لاتينية) ----------
+    // ---------- تصدير Excel (أرقام لاتينية مضمونة) ----------
     window.exportToExcel = ()=>{
         try {
-            const data = donations.map(d=> ({
-                'الاسم': subscribers.find(s=>s.id===d.subscriberId)?.name || '',
-                'المبلغ': d.amount,
-                'التاريخ': d.date,
-                'الحالة': d.status==='paid'?'مسدد':'غير مسدد'
-            }));
-            const ws = XLSX.utils.json_to_sheet(data);
+            // إنشاء مصفوفة البيانات مع رأس الجدول
+            const rows = [
+                ['الاسم', 'المبلغ', 'التاريخ', 'الحالة']
+            ];
+            
+            donations.forEach(d => {
+                const subName = subscribers.find(s=>s.id===d.subscriberId)?.name || '';
+                // نضيف علامة ' قبل المبلغ ليجبر Excel على اعتباره نصًا ويعرضه بالأرقام اللاتينية
+                const amountText = "'" + d.amount.toString();
+                const statusText = d.status === 'paid' ? 'مسدد' : 'غير مسدد';
+                rows.push([subName, amountText, d.date, statusText]);
+            });
+            
+            const ws = XLSX.utils.aoa_to_sheet(rows);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'التبرعات');
             XLSX.writeFile(wb, 'تبرعات_اهل_لفريگ.xlsx');
