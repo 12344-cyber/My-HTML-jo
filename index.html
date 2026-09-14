@@ -265,7 +265,6 @@
   }
   .info-box b { color: #00FF00; }
   @media (max-width: 500px) {
-    .row-buttons.c3 { grid-template-columns: repeat(3, 1fr); font-size: 0.8rem; }
     .row-buttons.c4 { grid-template-columns: repeat(2, 1fr); }
     .slider-row label { min-width: 70px; font-size: 0.8rem; }
   }
@@ -276,7 +275,7 @@
 
   <h1>🎬 استوديو الفيديو المتكامل</h1>
 
-  <!-- ============ 1: مصدر الفيديو ============ -->
+  <!-- 1: مصدر الفيديو -->
   <div class="step" id="step1">
     <div class="step-title"><span class="num">1</span> الفيديو <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -298,7 +297,7 @@
     </div>
   </div>
 
-  <!-- ============ 2: القص ============ -->
+  <!-- 2: القص -->
   <div class="step collapsed" id="step2">
     <div class="step-title"><span class="num">2</span> القص <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -320,7 +319,7 @@
     </div>
   </div>
 
-  <!-- ============ 3: مقاس الفيديو ============ -->
+  <!-- 3: مقاس الفيديو -->
   <div class="step collapsed" id="step3">
     <div class="step-title"><span class="num">3</span> مقاس الفيديو <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -341,7 +340,7 @@
     </div>
   </div>
 
-  <!-- ============ 4: الخبر ============ -->
+  <!-- 4: الخبر -->
   <div class="step collapsed" id="step4">
     <div class="step-title"><span class="num">4</span> الخبر <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -375,7 +374,7 @@
         <div class="positions" id="posButtons">
           <button class="pos-btn" data-pos="top">⬆️</button>
           <button class="pos-btn" data-pos="middle">⏺️</button>
-          <button class="pos-btn" data-pos="bottom" class="active">⬇️</button>
+          <button class="pos-btn active" data-pos="bottom">⬇️</button>
           <button class="pos-btn" data-pos="bottomleft">↙️</button>
           <button class="pos-btn" data-pos="bottomright">↘️</button>
           <button class="pos-btn" data-pos="center">🎯</button>
@@ -392,7 +391,7 @@
     </div>
   </div>
 
-  <!-- ============ 5: الشعار والصور ============ -->
+  <!-- 5: الشعار والصور -->
   <div class="step collapsed" id="step5">
     <div class="step-title"><span class="num">5</span> الشعار والصور <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -434,7 +433,7 @@
     </div>
   </div>
 
-  <!-- ============ 6: الصوت والموسيقى ============ -->
+  <!-- 6: الصوت والموسيقى -->
   <div class="step collapsed" id="step6">
     <div class="step-title"><span class="num">6</span> الصوت والموسيقى <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -460,7 +459,7 @@
     </div>
   </div>
 
-  <!-- ============ 7: الفيديو الآخر ============ -->
+  <!-- 7: الفيديو الآخر -->
   <div class="step collapsed" id="step7">
     <div class="step-title"><span class="num">7</span> الفيديو الآخر <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -470,7 +469,7 @@
     </div>
   </div>
 
-  <!-- ============ 8: المعاينة ============ -->
+  <!-- 8: المعاينة -->
   <div class="step" id="step8">
     <div class="step-title"><span class="num">8</span> المعاينة <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -479,7 +478,7 @@
     </div>
   </div>
 
-  <!-- ============ 9: التصدير ============ -->
+  <!-- 9: التصدير -->
   <div class="step" id="step9">
     <div class="step-title"><span class="num">9</span> التصدير <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -521,10 +520,8 @@
 
 <script>
 // ============================================================
-//  استوديو الفيديو المتكامل — نسخة محسّنة للهاتف
+//  المتغيرات العامة - كلها في مكان واحد
 // ============================================================
-
-// ===== المتغيرات العامة =====
 let logoImg = null;
 let videoLoaded = false;
 let cameraReady = false;
@@ -535,6 +532,7 @@ let activeSource = 'file';
 let broadcast = 'main';
 let musicOn = false;
 let currentFacing = 'user';
+let currentPhase = 'main';
 
 // القص
 let videoDuration = 0;
@@ -552,6 +550,7 @@ let videoSpeed = 1;
 
 // الخبر
 let newsMode = 'static';
+let newsSize = 3;                 // ✅ الآن مُعرَّف في الأعلى
 let tickerSpeedFactor = 1;
 let tickerX = 0;
 let tickerInited = false;
@@ -565,10 +564,9 @@ let musicBoost = 1.8;
 let overlays = [];
 let overlayIdCounter = 0;
 
-// صورة افتتاحية / ختامية
+// افتتاحية/ختامية
 let introImg = null, introDuration = 2;
 let outroImg = null, outroDuration = 2;
-let currentPhase = 'main'; // 'intro' | 'main' | 'outro'
 
 // المعاينة
 let isDragging = null;
@@ -587,12 +585,13 @@ let pickMime = '';
 let timerInterval = null;
 let recordStartTime = 0;
 let introTimeoutId = null;
+let lastFrameTime = 0;
 
 // موضع النص والشعار
 let newsX = 0.5, newsY = 0.85;
 let logoX = 0.5, logoY = 0.15;
 
-// ===== عناصر الفيديو/الصوت المخفية =====
+// ===== عناصر فيديو/صوت مخفية =====
 const video = document.createElement('video');
 video.playsInline = true;
 video.volume = 1;
@@ -671,9 +670,9 @@ const outroDurationInp = $('outroDuration');
 const introDurationVal = $('introDurationVal');
 const outroDurationVal = $('outroDurationVal');
 
-const videoVol = $('videoVol');
-const micVol = $('micVol');
-const musicVol = $('musicVol');
+const videoVolEl = $('videoVol');
+const micVolEl = $('micVol');
+const musicVolEl = $('musicVol');
 const videoVolVal = $('videoVolVal');
 const micVolVal = $('micVolVal');
 const musicVolVal = $('musicVolVal');
@@ -711,7 +710,7 @@ function fmtTime(s) {
 }
 
 // ============================================================
-//  نظام الصوت المختلط (يبقى كما كان يعمل)
+//  نظام الصوت المختلط
 // ============================================================
 let audioCtx = null, audioDest = null;
 let srcMainEl = null, srcOtherEl = null, srcMusicEl = null, micNode = null;
@@ -720,7 +719,7 @@ let gainMain = null, gainOther = null, gainMic = null, gainMusic = null;
 function ensureAudio() {
   if (audioCtx) return audioCtx;
   const AC = window.AudioContext || window.webkitAudioContext;
-  if (!AC) { console.warn('AudioContext غير مدعوم'); return null; }
+  if (!AC) return null;
   try {
     audioCtx = new AC();
     audioDest = audioCtx.createMediaStreamDestination();
@@ -745,16 +744,13 @@ function ensureAudio() {
     gainMusic.connect(audioCtx.destination);
     return audioCtx;
   } catch (e) {
-    console.error('فشل إنشاء AudioContext:', e);
     audioCtx = null;
     return null;
   }
 }
 function resumeAudio() {
   const c = ensureAudio();
-  if (c && c.state === 'suspended') {
-    c.resume().then(() => console.log('AudioContext resumed')).catch(() => {});
-  }
+  if (c && c.state === 'suspended') c.resume().catch(() => {});
   return c;
 }
 function connectMainEl() {
@@ -762,21 +758,21 @@ function connectMainEl() {
   try {
     srcMainEl = audioCtx.createMediaElementSource(video);
     srcMainEl.connect(gainMain);
-  } catch (e) { console.warn(e); }
+  } catch (e) {}
 }
 function connectOtherEl() {
   if (!ensureAudio() || srcOtherEl) return;
   try {
     srcOtherEl = audioCtx.createMediaElementSource(otherVideo);
     srcOtherEl.connect(gainOther);
-  } catch (e) { console.warn(e); }
+  } catch (e) {}
 }
 function connectMusicEl() {
   if (!ensureAudio() || srcMusicEl) return;
   try {
     srcMusicEl = audioCtx.createMediaElementSource(musicEl);
     srcMusicEl.connect(gainMusic);
-  } catch (e) { console.warn(e); }
+  } catch (e) {}
 }
 function connectMic() {
   if (!ensureAudio() || !cameraStream) return false;
@@ -787,7 +783,7 @@ function connectMic() {
     micNode = audioCtx.createMediaStreamSource(cameraStream);
     micNode.connect(gainMic);
     return true;
-  } catch (e) { console.warn(e); return false; }
+  } catch (e) { return false; }
 }
 function applyMix() {
   if (!audioCtx) return;
@@ -795,16 +791,16 @@ function applyMix() {
   const mainOn  = (broadcast === 'main')  ? 1 : 0;
   const otherOn = (broadcast === 'other') ? 1 : 0;
   const micOn   = (broadcast === 'main' && !musicOn && currentPhase === 'main') ? micVolume : 0;
-  const musicVol = (broadcast === 'main' && musicOn) ? musicBoost : 0;
+  const musLvl  = (broadcast === 'main' && musicOn) ? musicBoost : 0;
 
   if (gainMain)  gainMain.gain.setTargetAtTime(mainOn * videoVolume, t, 0.05);
   if (gainMic)   gainMic.gain.setTargetAtTime(micOn, t, 0.05);
   if (gainOther) gainOther.gain.setTargetAtTime(otherOn, t, 0.05);
-  if (gainMusic) gainMusic.gain.setTargetAtTime(musicVol, t, 0.08);
+  if (gainMusic) gainMusic.gain.setTargetAtTime(musLvl, t, 0.08);
 }
 
 // ============================================================
-//  اختيار أفضل صيغة
+//  اختيار الصيغة
 // ============================================================
 function pickBestMime(hasAudio) {
   if (typeof MediaRecorder === 'undefined') return { mime: '', ext: 'webm' };
@@ -840,13 +836,50 @@ function pickBestMime(hasAudio) {
 }
 
 // ============================================================
-//  مشاهد (وضع الطي)
+//  طي الأقسام
 // ============================================================
 document.querySelectorAll('.step-title').forEach(t => {
   t.addEventListener('click', () => {
     t.parentElement.classList.toggle('collapsed');
   });
 });
+
+// ============================================================
+//  resize canvas + refresh button
+// ============================================================
+function computeCanvasSize() {
+  const q = exportQuality;
+  let w, h;
+  if (aspectRatio === '9:16') { h = q; w = Math.round(q * 9 / 16); }
+  else if (aspectRatio === '16:9') { w = q; h = Math.round(q * 9 / 16); }
+  else if (aspectRatio === '1:1') { w = h = q; }
+  else {
+    const ar = sourceAspect || 16 / 9;
+    if (ar >= 1) { h = q; w = Math.round(q * ar); }
+    else { w = q; h = Math.round(q / ar); }
+  }
+  w -= w % 2; h -= h % 2;
+  if (w < 2) w = 2;
+  if (h < 2) h = 2;
+  return { w, h };
+}
+
+function updateCanvasSize() {
+  const size = computeCanvasSize();
+  canvasW = size.w;
+  canvasH = size.h;
+  canvas.width = canvasW;
+  canvas.height = canvasH;
+  sizeInfo.innerHTML = 'الحجم: <b>' + canvasW + '×' + canvasH + '</b> — الجودة: <b>' +
+    exportQuality + 'p</b> — النسبة: <b>' + aspectRatio + '</b>';
+}
+
+function refreshStartBtn() {
+  try {
+    const ready = (activeSource === 'file') ? videoLoaded : cameraReady;
+    btnStart.disabled = !ready || isRecording;
+  } catch (e) { console.error('refreshStartBtn error', e); }
+}
 
 // ============================================================
 //  1) مصدر الفيديو
@@ -857,61 +890,61 @@ sourceButtons.addEventListener('click', e => {
   sourceButtons.querySelectorAll('button').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   activeSource = btn.dataset.src;
-
   fileBox.style.display   = (activeSource === 'file')   ? 'block' : 'none';
   cameraBox.style.display = (activeSource === 'camera') ? 'block' : 'none';
-
   updateCanvasSize();
   refreshStartBtn();
-  redraw();
+  redraw(0);
 });
 
 videoFileInp.addEventListener('change', e => {
   const f = e.target.files[0];
   if (!f) return;
-  try {
-    if (video.src) URL.revokeObjectURL(video.src);
-    video.src = URL.createObjectURL(f);
-    video.load();
-  } catch (err) {
-    setStatus('err', '⚠️ خطأ في تحميل الفيديو');
-    return;
-  }
+
+  // اضبط المعالج قبل التحميل
   video.onloadedmetadata = () => {
     videoLoaded = true;
-    video.currentTime = 0;
-    sourceAspect = video.videoWidth / video.videoHeight;
-    videoDuration = video.duration;
+    try { video.currentTime = 0; } catch (e) {}
+    sourceAspect = (video.videoWidth / video.videoHeight) || (16 / 9);
+    videoDuration = video.duration || 0;
     trimStartTime = 0;
     trimEndTime = videoDuration;
 
-    // إعداد القص
-    trimStart.max = videoDuration;
-    trimEnd.max = videoDuration;
+    trimStart.max = videoDuration || 100;
+    trimEnd.max = videoDuration || 100;
     trimStart.value = 0;
-    trimEnd.value = videoDuration;
+    trimEnd.value = videoDuration || 0;
     trimHint.style.display = 'none';
     trimControls.style.display = 'block';
     updateTrimDisplay();
 
-    // مدة العرض
     videoInfo.style.display = 'block';
     videoInfo.innerHTML = '✅ الفيديو: <b>' + video.videoWidth + '×' + video.videoHeight +
       '</b> — المدة: <b>' + fmtTime(videoDuration) + '</b>';
 
     updateCanvasSize();
     refreshStartBtn();
-    redraw();
-    setStatus('ok', '✅ الفيديو جاهز — انتقل للخطوة 2 للقص أو الخطوة 9 للتسجيل');
+    redraw(0);
+    setStatus('ok', '✅ الفيديو جاهز — انتقل للخطوة 2 للقص أو 9 للتسجيل');
   };
   video.onerror = () => setStatus('err', '⚠️ خطأ في صيغة الفيديو');
+
+  try {
+    if (video.src) URL.revokeObjectURL(video.src);
+    video.src = URL.createObjectURL(f);
+    video.load();
+  } catch (err) {
+    setStatus('err', '⚠️ خطأ في تحميل الفيديو');
+  }
 });
 
-// الكاميرا
 async function startCameraStream(facing) {
   if (cameraStream) {
     try { cameraStream.getTracks().forEach(t => t.stop()); } catch (e) {}
     cameraStream = null;
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    throw new Error('المتصفح لا يدعم الكاميرا');
   }
   const constraints = {
     video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -940,7 +973,7 @@ btnCamOn.addEventListener('click', async function () {
     btnCamOn.style.display = 'none';
     camControls.style.display = 'grid';
     refreshStartBtn();
-    redraw();
+    redraw(0);
     const hasMic = cameraStream.getAudioTracks().length > 0;
     setStatus('ok', '✅ الكاميرا جاهزة' + (hasMic ? ' مع الميكروفون 🎤' : '') + ' — اضغط 📤 للبدء');
   } catch (e) {
@@ -960,7 +993,7 @@ btnSwitchCam.addEventListener('click', async function () {
     if (audioCtx) { connectMic(); applyMix(); }
     sourceAspect = (camVideo.videoWidth || 16) / (camVideo.videoHeight || 9);
     updateCanvasSize();
-    redraw();
+    redraw(0);
     setStatus('ok', '✅ تم التبديل إلى الكاميرا ' + (newFacing === 'user' ? 'الأمامية' : 'الخلفية'));
   } catch (e) {
     setStatus('err', '⚠️ تعذر تبديل الكاميرا: ' + (e.message || e));
@@ -986,12 +1019,7 @@ function stopCamera() {
   btnCamOn.style.display = 'flex';
   camControls.style.display = 'none';
   refreshStartBtn();
-  redraw();
-}
-
-function refreshStartBtn() {
-  const ready = (activeSource === 'file') ? videoLoaded : cameraReady;
-  btnStart.disabled = !ready || isRecording;
+  redraw(0);
 }
 
 // ============================================================
@@ -999,22 +1027,13 @@ function refreshStartBtn() {
 // ============================================================
 trimStart.addEventListener('input', () => {
   let v = parseFloat(trimStart.value);
-  if (v >= trimEndTime - 0.1) {
-    v = trimEndTime - 0.1;
-    trimStart.value = v;
-  }
+  if (v >= trimEndTime - 0.1) { v = Math.max(0, trimEndTime - 0.1); trimStart.value = v; }
   trimStartTime = v;
   updateTrimDisplay();
-  if (video.currentTime < trimStartTime || video.currentTime > trimEndTime) {
-    video.currentTime = trimStartTime;
-  }
 });
 trimEnd.addEventListener('input', () => {
   let v = parseFloat(trimEnd.value);
-  if (v <= trimStartTime + 0.1) {
-    v = trimStartTime + 0.1;
-    trimEnd.value = v;
-  }
+  if (v <= trimStartTime + 0.1) { v = Math.min(videoDuration, trimStartTime + 0.1); trimEnd.value = v; }
   trimEndTime = v;
   updateTrimDisplay();
 });
@@ -1032,7 +1051,7 @@ btnTrimReset.addEventListener('click', () => {
 });
 
 // ============================================================
-//  3) مقاس الفيديو والجودة
+//  3) المقاس والجودة
 // ============================================================
 aspectButtons.addEventListener('click', e => {
   const btn = e.target.closest('button');
@@ -1041,7 +1060,7 @@ aspectButtons.addEventListener('click', e => {
   btn.classList.add('active');
   aspectRatio = btn.dataset.aspect;
   updateCanvasSize();
-  redraw();
+  redraw(0);
 });
 qualityButtons.addEventListener('click', e => {
   const btn = e.target.closest('button');
@@ -1050,42 +1069,15 @@ qualityButtons.addEventListener('click', e => {
   btn.classList.add('active');
   exportQuality = parseInt(btn.dataset.quality);
   updateCanvasSize();
-  redraw();
+  redraw(0);
 });
-
-function computeCanvasSize() {
-  const q = exportQuality;
-  let w, h;
-  if (aspectRatio === '9:16') { h = q; w = Math.round(q * 9 / 16); }
-  else if (aspectRatio === '16:9') { w = q; h = Math.round(q * 9 / 16); }
-  else if (aspectRatio === '1:1') { w = h = q; }
-  else {
-    // original
-    const ar = sourceAspect || 16/9;
-    if (ar >= 1) { h = q; w = Math.round(q * ar); }
-    else { w = q; h = Math.round(q / ar); }
-  }
-  // اجعل القيم زوجية
-  w -= w % 2; h -= h % 2;
-  return { w, h };
-}
-
-function updateCanvasSize() {
-  const size = computeCanvasSize();
-  canvasW = size.w;
-  canvasH = size.h;
-  canvas.width = canvasW;
-  canvas.height = canvasH;
-  sizeInfo.innerHTML = 'الحجم: <b>' + canvasW + '×' + canvasH + '</b> — الجودة: <b>' +
-    exportQuality + 'p</b> — النسبة: <b>' + aspectRatio + '</b>';
-}
 
 // ============================================================
 //  4) الخبر
 // ============================================================
 newsText.addEventListener('input', () => {
   tickerInited = false;
-  redraw();
+  redraw(0);
 });
 
 newsModeButtons.addEventListener('click', e => {
@@ -1097,7 +1089,7 @@ newsModeButtons.addEventListener('click', e => {
   tickerSpeedBox.style.display = (newsMode === 'ticker') ? 'block' : 'none';
   staticPosBox.style.display = (newsMode === 'static') ? 'block' : 'none';
   tickerInited = false;
-  redraw();
+  redraw(0);
 });
 
 tickerSpeedButtons.addEventListener('click', e => {
@@ -1114,9 +1106,8 @@ sizeButtons.addEventListener('click', e => {
   sizeButtons.querySelectorAll('button').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   newsSize = parseInt(btn.dataset.size);
-  redraw();
+  redraw(0);
 });
-let newsSize = 3;
 
 const POS_MAP = {
   top:         { x: 0.5, y: 0.15 },
@@ -1133,7 +1124,7 @@ posButtons.addEventListener('click', e => {
   btn.classList.add('active');
   const p = POS_MAP[btn.dataset.pos];
   newsX = p.x; newsY = p.y;
-  redraw();
+  redraw(0);
 });
 
 speedButtons.addEventListener('click', e => {
@@ -1142,8 +1133,8 @@ speedButtons.addEventListener('click', e => {
   speedButtons.querySelectorAll('button').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   videoSpeed = parseFloat(btn.dataset.speed);
-  try { video.playbackRate = videoSpeed; } catch (e) {}
-  try { otherVideo.playbackRate = videoSpeed; } catch (e) {}
+  try { video.playbackRate = videoSpeed; } catch (er) {}
+  try { otherVideo.playbackRate = videoSpeed; } catch (er) {}
 });
 
 // ============================================================
@@ -1158,8 +1149,8 @@ logoFile.addEventListener('change', e => {
     logoPreview.src = img.src;
     logoPreview.classList.add('visible');
     const info = logoPreview.parentElement.querySelector('.info');
-    if (info) info.innerHTML = '<b style="color:#00FF00;">تم اختيار الشعار ✅</b><br><span style="font-size:0.8rem;">اختر صورة أخرى للتبديل</span>';
-    redraw();
+    if (info) info.innerHTML = '<b style="color:#00FF00;">تم اختيار الشعار ✅</b>';
+    redraw(0);
   };
   img.src = URL.createObjectURL(f);
 });
@@ -1178,7 +1169,7 @@ overlayFile.addEventListener('change', e => {
         name: f.name.slice(0, 20)
       });
       renderOverlayList();
-      redraw();
+      redraw(0);
     };
     img.src = URL.createObjectURL(f);
   }
@@ -1192,7 +1183,7 @@ function renderOverlayList() {
     div.innerHTML = `
       <img src="${o.img.src}" alt="">
       <div class="name">${o.name}</div>
-      <input type="range" min="10" max="100" value="${o.scale*100}" style="width:80px;" data-id="${o.id}">
+      <input type="range" min="10" max="100" value="${Math.round(o.scale*100)}" style="width:80px;" data-id="${o.id}">
       <button data-id="${o.id}" data-act="toggle" style="background:${o.visible?'#00FF00':'#455a64'};color:#0a1a2e;">${o.visible?'👁️':'🚫'}</button>
       <button data-id="${o.id}" data-act="del" style="background:#ff4757;color:#fff;">🗑️</button>
     `;
@@ -1202,7 +1193,7 @@ function renderOverlayList() {
     inp.addEventListener('input', ev => {
       const id = parseInt(ev.target.dataset.id);
       const o = overlays.find(x => x.id === id);
-      if (o) { o.scale = parseInt(ev.target.value) / 100; redraw(); }
+      if (o) { o.scale = parseInt(ev.target.value) / 100; redraw(0); }
     });
   });
   overlayList.querySelectorAll('button').forEach(btn => {
@@ -1211,15 +1202,14 @@ function renderOverlayList() {
       const act = ev.target.dataset.act;
       const idx = overlays.findIndex(x => x.id === id);
       if (idx === -1) return;
-      if (act === 'del') { overlays.splice(idx, 1); }
-      else if (act === 'toggle') { overlays[idx].visible = !overlays[idx].visible; }
+      if (act === 'del') overlays.splice(idx, 1);
+      else if (act === 'toggle') overlays[idx].visible = !overlays[idx].visible;
       renderOverlayList();
-      redraw();
+      redraw(0);
     });
   });
 }
 
-// صور افتتاحية / ختامية
 introFile.addEventListener('change', e => {
   const f = e.target.files[0];
   if (!f) return;
@@ -1229,7 +1219,6 @@ introFile.addEventListener('change', e => {
     introInfo.style.display = 'block';
     introInfo.innerHTML = '✅ صورة افتتاحية محمّلة';
     introDurationBox.style.display = 'block';
-    redraw();
   };
   img.src = URL.createObjectURL(f);
 });
@@ -1242,7 +1231,6 @@ outroFile.addEventListener('change', e => {
     outroInfo.style.display = 'block';
     outroInfo.innerHTML = '✅ صورة ختامية محمّلة';
     outroDurationBox.style.display = 'block';
-    redraw();
   };
   img.src = URL.createObjectURL(f);
 });
@@ -1258,21 +1246,21 @@ outroDurationInp.addEventListener('input', () => {
 // ============================================================
 //  6) الصوت والموسيقى
 // ============================================================
-videoVol.addEventListener('input', () => {
-  videoVolume = parseInt(videoVol.value) / 100;
-  videoVolVal.textContent = videoVol.value + '%';
+videoVolEl.addEventListener('input', () => {
+  videoVolume = parseInt(videoVolEl.value) / 100;
+  videoVolVal.textContent = videoVolEl.value + '%';
   if (audioCtx && gainMain && broadcast === 'main') {
     gainMain.gain.setTargetAtTime(videoVolume, audioCtx.currentTime, 0.05);
   }
 });
-micVol.addEventListener('input', () => {
-  micVolume = parseInt(micVol.value) / 100;
-  micVolVal.textContent = micVol.value + '%';
+micVolEl.addEventListener('input', () => {
+  micVolume = parseInt(micVolEl.value) / 100;
+  micVolVal.textContent = micVolEl.value + '%';
   applyMix();
 });
-musicVol.addEventListener('input', () => {
-  musicBoost = parseInt(musicVol.value) / 100;
-  musicVolVal.textContent = musicVol.value + '%';
+musicVolEl.addEventListener('input', () => {
+  musicBoost = parseInt(musicVolEl.value) / 100;
+  musicVolVal.textContent = musicVolEl.value + '%';
   if (audioCtx && musicOn && gainMusic) {
     gainMusic.gain.setTargetAtTime(musicBoost, audioCtx.currentTime, 0.05);
   }
@@ -1282,9 +1270,7 @@ musicFile.addEventListener('change', e => {
   const f = e.target.files[0];
   if (!f) return;
   musicLoaded = false;
-  try {
-    if (musicEl.src) URL.revokeObjectURL(musicEl.src);
-  } catch (er) {}
+  try { if (musicEl.src) URL.revokeObjectURL(musicEl.src); } catch (er) {}
   musicEl.src = URL.createObjectURL(f);
   musicEl.load();
   musicInfo.style.display = 'block';
@@ -1353,18 +1339,15 @@ function drawCover(el, W, H) {
   let dw, dh, dx, dy;
   if (va > ca) { dw = W; dh = W / va; dx = 0; dy = (H - dh) / 2; }
   else         { dh = H; dw = H * va; dx = (W - dw) / 2; dy = 0; }
-  try { ctx.drawImage(el, dx, dy, dw, dh); return true; }
-  catch (e) { return false; }
+  try { ctx.drawImage(el, dx, dy, dw, dh); return true; } catch (e) { return false; }
 }
-
 function drawImageCover(img, W, H) {
   if (!img || !img.width) return false;
   const ia = img.width / img.height, ca = W / H;
   let dw, dh, dx, dy;
   if (ia > ca) { dw = W; dh = W / ia; dx = 0; dy = (H - dh) / 2; }
   else         { dh = H; dw = H * ia; dx = (W - dw) / 2; dy = 0; }
-  try { ctx.drawImage(img, dx, dy, dw, dh); return true; }
-  catch (e) { return false; }
+  try { ctx.drawImage(img, dx, dy, dw, dh); return true; } catch (e) { return false; }
 }
 
 function drawLogo(W, H) {
@@ -1411,10 +1394,8 @@ function drawStaticNews(W, H) {
   let line = '';
   for (const w of words) {
     const test = line ? line + ' ' + w : w;
-    if (ctx.measureText(test).width > maxWidth && line) {
-      lines.push(line);
-      line = w;
-    } else line = test;
+    if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = w; }
+    else line = test;
   }
   if (line) lines.push(line);
 
@@ -1423,7 +1404,6 @@ function drawStaticNews(W, H) {
   const boxX = newsX * W;
   const boxY = newsY * H;
   const startY = boxY - totalH / 2 + lineH / 2;
-
   let maxLineW = 0;
   for (const l of lines) maxLineW = Math.max(maxLineW, ctx.measureText(l).width);
 
@@ -1466,7 +1446,6 @@ function drawTickerNews(W, H, dt) {
   const bgH = fs * 1.8;
   const top = y - bgH / 2;
 
-  // شريط الخلفية
   ctx.fillStyle = 'rgba(0,0,0,0.75)';
   ctx.fillRect(0, top, W, bgH);
   ctx.strokeStyle = '#00FF00';
@@ -1476,8 +1455,7 @@ function drawTickerNews(W, H, dt) {
   ctx.moveTo(0, top + bgH); ctx.lineTo(W, top + bgH);
   ctx.stroke();
 
-  // تحديث الموضع
-  tickerX -= (W * 0.25 * tickerSpeedFactor) * dt;
+  tickerX -= (W * 0.25 * tickerSpeedFactor) * (dt || 0.016);
   if (tickerX < -textW - 30) tickerX = W + 30;
 
   ctx.fillStyle = '#00FF00';
@@ -1485,59 +1463,6 @@ function drawTickerNews(W, H, dt) {
   ctx.shadowColor = '#00FF00';
   ctx.fillText(news, tickerX, y);
   ctx.shadowBlur = 0;
-}
-
-function redraw(dt) {
-  const W = canvas.width, H = canvas.height;
-  if (!W || !H) return;
-
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, W, H);
-
-  // ===== الافتتاحية / الختامية =====
-  if (currentPhase === 'intro' && introImg) {
-    drawImageCover(introImg, W, H);
-    drawTickerOrNews(W, H, dt);
-    return;
-  }
-  if (currentPhase === 'outro' && outroImg) {
-    drawImageCover(outroImg, W, H);
-    drawTickerOrNews(W, H, dt);
-    return;
-  }
-
-  // ===== الفيديو =====
-  let drew = false;
-  if (broadcast === 'other' && otherLoaded && otherVideo.readyState >= 2) {
-    drew = drawCover(otherVideo, W, H);
-    if (activeSource === 'camera' && camVideo.readyState >= 2) drawPip(camVideo, W, H);
-  } else {
-    if (activeSource === 'camera') {
-      if (camVideo.readyState >= 2) drew = drawCover(camVideo, W, H);
-    } else {
-      if (videoLoaded && video.readyState >= 2) drew = drawCover(video, W, H);
-    }
-  }
-
-  if (!drew) {
-    ctx.fillStyle = '#5a7a9a';
-    ctx.font = `${Math.min(20, W * 0.03)}px Cairo, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(
-      activeSource === 'camera' ? '🎥 اضغط «تشغيل الكاميرا»' : '🎥 اختر فيديو من الخطوة 1',
-      W / 2, H / 2
-    );
-  }
-
-  // الصور الإضافية
-  drawOverlays(W, H);
-
-  // الشعار
-  drawLogo(W, H);
-
-  // الخبر
-  drawTickerOrNews(W, H, dt);
 }
 
 function drawTickerOrNews(W, H, dt) {
@@ -1570,6 +1495,53 @@ function drawPip(el, W, H) {
   ctx.restore();
 }
 
+function redraw(dt) {
+  const W = canvas.width, H = canvas.height;
+  if (!W || !H) return;
+
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+
+  // افتتاحية/ختامية
+  if (currentPhase === 'intro' && introImg) {
+    drawImageCover(introImg, W, H);
+    drawTickerOrNews(W, H, dt);
+    return;
+  }
+  if (currentPhase === 'outro' && outroImg) {
+    drawImageCover(outroImg, W, H);
+    drawTickerOrNews(W, H, dt);
+    return;
+  }
+
+  let drew = false;
+  if (broadcast === 'other' && otherLoaded && otherVideo.readyState >= 2) {
+    drew = drawCover(otherVideo, W, H);
+    if (activeSource === 'camera' && camVideo.readyState >= 2) drawPip(camVideo, W, H);
+  } else {
+    if (activeSource === 'camera') {
+      if (camVideo.readyState >= 2) drew = drawCover(camVideo, W, H);
+    } else {
+      if (videoLoaded && video.readyState >= 2) drew = drawCover(video, W, H);
+    }
+  }
+
+  if (!drew) {
+    ctx.fillStyle = '#5a7a9a';
+    ctx.font = `${Math.min(20, W * 0.03)}px Cairo, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(
+      activeSource === 'camera' ? '🎥 اضغط «تشغيل الكاميرا»' : '🎥 اختر فيديو من الخطوة 1',
+      W / 2, H / 2
+    );
+  }
+
+  drawOverlays(W, H);
+  drawLogo(W, H);
+  drawTickerOrNews(W, H, dt);
+}
+
 // ============================================================
 //  السحب
 // ============================================================
@@ -1587,7 +1559,6 @@ function inside(pt, b) {
 function down(e) {
   if (isRecording) return;
   const pt = getPt(e);
-  // الشعار
   if (inside(pt, canvas._logoBounds)) {
     isDragging = 'logo';
     dragOff.x = pt.x - canvas._logoBounds.x;
@@ -1595,7 +1566,6 @@ function down(e) {
     if (e.cancelable) e.preventDefault();
     return;
   }
-  // النص الثابت
   if (newsMode === 'static' && inside(pt, canvas._newsBounds)) {
     isDragging = 'news';
     dragOff.x = pt.x - canvas._newsBounds.x;
@@ -1603,7 +1573,6 @@ function down(e) {
     if (e.cancelable) e.preventDefault();
     return;
   }
-  // الصور — من الأعلى للأسفل
   if (canvas._overlayBounds) {
     for (let i = canvas._overlayBounds.length - 1; i >= 0; i--) {
       const b = canvas._overlayBounds[i];
@@ -1632,14 +1601,14 @@ function move(e) {
     logoY = Math.max(0.1, Math.min(0.9, (pt.y - dragOff.y + b.h / 2) / H));
   } else if (isDragging === 'overlay') {
     const o = overlays[dragOff.index];
-    const b = canvas._overlayBounds.find(x => x.index === dragOff.index);
+    const b = (canvas._overlayBounds || []).find(x => x.index === dragOff.index);
     if (o && b) {
       o.x = Math.max(0.05, Math.min(0.95, (pt.x - dragOff.x + b.w / 2) / W));
       o.y = Math.max(0.05, Math.min(0.95, (pt.y - dragOff.y + b.h / 2) / H));
     }
   }
   if (e.cancelable) e.preventDefault();
-  redraw();
+  redraw(0);
 }
 function up() { isDragging = null; }
 
@@ -1653,20 +1622,17 @@ canvas.addEventListener('touchend', up);
 canvas.addEventListener('touchcancel', up);
 
 // ============================================================
-//  حلقة العرض والرسم
+//  حلقة العرض
 // ============================================================
-let lastFrameTime = 0;
 function renderLoop(ts) {
-  const dt = lastFrameTime ? Math.min(0.1, (ts - lastFrameTime) / 1000) : 0;
+  const dt = lastFrameTime ? Math.min(0.1, (ts - lastFrameTime) / 1000) : 0.016;
   lastFrameTime = ts;
 
-  // مؤقّت الشريط فقط يعمل باستمرار
   const needsAnim = (newsMode === 'ticker' && newsText.value.trim()) || isRecording;
   if (needsAnim) redraw(dt);
 
-  // فحص نهاية القص
   if (isRecording && currentPhase === 'main' && broadcast === 'main') {
-    if (activeSource === 'file' && videoLoaded) {
+    if (activeSource === 'file' && videoLoaded && trimEndTime > 0) {
       if (video.currentTime >= trimEndTime) {
         try { video.pause(); } catch (e) {}
         transitionAfterMain();
@@ -1676,7 +1642,6 @@ function renderLoop(ts) {
 
   animFrame = requestAnimationFrame(renderLoop);
 }
-animFrame = requestAnimationFrame(renderLoop);
 
 // ============================================================
 //  المؤقّت
@@ -1780,9 +1745,11 @@ function updateMusicUI() {
 //  بدء التسجيل
 // ============================================================
 btnStart.addEventListener('click', function () {
+  console.log('BTN START clicked. isRecording=', isRecording, 'activeSource=', activeSource,
+    'videoLoaded=', videoLoaded, 'cameraReady=', cameraReady);
+
   if (isRecording) return;
 
-  // فحوصات أولية
   if (typeof MediaRecorder === 'undefined') {
     setStatus('err', '⚠️ المتصفح لا يدعم MediaRecorder — جرّب Chrome أو Safari حديث');
     return;
@@ -1893,7 +1860,6 @@ btnStart.addEventListener('click', function () {
       (audioAdded ? ' مع الصوت ✅' : ' (بدون صوت)') +
       '<br>اضغط الزر الأحمر عند الانتهاء');
 
-    // الافتتاحية
     if (introImg) {
       currentPhase = 'intro';
       applyMix();
@@ -1922,7 +1888,7 @@ function startMainPhase() {
   applyMix();
 
   if (activeSource === 'file') {
-    video.currentTime = trimStartTime;
+    try { video.currentTime = trimStartTime || 0; } catch (e) {}
     const p = video.play();
     if (p && p.catch) p.catch(err => {
       console.error('play failed:', err);
@@ -1936,9 +1902,7 @@ function transitionAfterMain() {
   if (outroImg) {
     currentPhase = 'outro';
     applyMix();
-    setTimeout(() => {
-      stopRecording();
-    }, outroDuration * 1000);
+    setTimeout(() => stopRecording(), outroDuration * 1000);
   } else {
     stopRecording();
   }
@@ -1959,7 +1923,6 @@ function stopRecording() {
   try {
     if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
   } catch (e) {
-    console.warn(e);
     finishRecording();
   }
 
@@ -1995,8 +1958,7 @@ function finishRecording() {
     setStatus('err', '⚠️ لم يتم تسجيل أي بيانات — جرّب مرة أخرى');
     return;
   }
-  let mime = (mediaRecorder && mediaRecorder.mimeType) || pickMime || 'video/webm';
-  // نتحقق من MIME الحقيقي
+  const mime = (mediaRecorder && mediaRecorder.mimeType) || pickMime || 'video/webm';
   const isMp4 = mime.indexOf('mp4') !== -1;
   outputExt = isMp4 ? 'mp4' : 'webm';
 
@@ -2012,7 +1974,7 @@ function finishRecording() {
     '✅ <b>تم التصدير بنجاح</b><br>' +
     'الحجم: <b>' + sizeMB + ' ميجابايت</b><br>' +
     'الصيغة: <b>' + outputExt.toUpperCase() + '</b>' +
-    (isMp4 ? '' : '<br><span style="color:#ffc107;">ملاحظة: متصفحك لا يدعم MP4 — الناتج WebM (يعمل في معظم المشغلات الحديثة ويمكن رفعه على فيسبوك وتيك توك).</span>') +
+    (isMp4 ? '' : '<br><span style="color:#ffc107;">ملاحظة: متصفحك لا يدعم MP4 — الناتج WebM ويعمل في معظم المشغلات الحديثة.</span>') +
     '<br>الأبعاد: <b>' + canvasW + '×' + canvasH + '</b>';
 
   resultBox.style.display = 'block';
@@ -2052,13 +2014,11 @@ btnDownload.addEventListener('click', function () {
 // ============================================================
 btnNewVideo.addEventListener('click', function () {
   if (!confirm('سيتم مسح التسجيل الحالي والبدء من جديد. متابعة؟')) return;
-  if (outputBlob) {
-    outputBlob = null;
-  }
+  outputBlob = null;
   recordedChunks = [];
   resultBox.style.display = 'none';
   btnStart.style.display = 'flex';
-  btnStart.disabled = false;
+  refreshStartBtn();
   setStatus('', '✅ جاهز لفيديو جديد — اضغط 📤 لبدء التسجيل');
 });
 
@@ -2066,10 +2026,11 @@ btnNewVideo.addEventListener('click', function () {
 //  التهيئة
 // ============================================================
 updateCanvasSize();
+refreshStartBtn();
 redraw(0);
+animFrame = requestAnimationFrame(renderLoop);
 setStatus('', '👆 اختر مصدر الفيديو للبدء');
 
-// إغلاق الموارد عند إغلاق الصفحة
 window.addEventListener('beforeunload', () => {
   try { if (cameraStream) cameraStream.getTracks().forEach(t => t.stop()); } catch (e) {}
   try { if (canvasStream) canvasStream.getTracks().forEach(t => t.stop()); } catch (e) {}
