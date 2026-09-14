@@ -327,14 +327,12 @@
     <div class="step-title"><span class="num">2</span> اكتب الخبر هنا</div>
     <textarea id="newsText" placeholder="اكتب خبرك هنا... مثال: افتتاح طريق جديد في نواكشوط"></textarea>
 
-    <!-- ✅ نمط العرض -->
     <label style="margin-top:12px;">نمط العرض</label>
     <div class="size-buttons" id="newsModeButtons" style="grid-template-columns: repeat(2, 1fr);">
       <button data-mode="static" class="active">📰 ثابت</button>
       <button data-mode="ticker">📜 شريط متحرك</button>
     </div>
 
-    <!-- ✅ سرعة الشريط -->
     <div id="tickerSpeedBox" style="display:none; margin-top:12px;">
       <label>سرعة الشريط</label>
       <div class="size-buttons" id="tickerSpeedButtons" style="grid-template-columns: repeat(3, 1fr);">
@@ -413,15 +411,16 @@
     </div>
     <div id="musicInfo" class="hint" style="display:none;"></div>
 
+    <!-- ✅ مستوى الموسيقى — القيمة الافتراضية 100% -->
     <div id="musicVolBox" style="display:none; margin-top:12px;">
       <label style="display:flex; justify-content:space-between; align-items:center;">
         <span>🔊 مستوى صوت الموسيقى</span>
-        <span id="musicVolVal" style="color:#d8b4ff; font-weight:900;">180%</span>
+        <span id="musicVolVal" style="color:#d8b4ff; font-weight:900;">100%</span>
       </label>
-      <input type="range" id="musicVol" min="0" max="400" value="180" step="10"
+      <input type="range" id="musicVol" min="0" max="200" value="100" step="5"
              style="margin-top:10px;">
       <div class="hint" style="margin-top:8px; background:#9c27b010; border-right-color:#9c27b0;">
-        💡 ارفع النسبة إذا كانت الموسيقى منخفضة، أو أنزلها إذا كانت تغطي على الكلام.
+        💡 100% = المستوى الطبيعي. ارفع النسبة بحذر إذا كانت الموسيقى منخفضة.
       </div>
     </div>
   </div>
@@ -466,10 +465,10 @@
 <script>
 // ============================================================
 //  استوديو فيديو مباشر
-//  - رفع فيديو أو تصوير مباشر بالكاميرا (مع تبديل أمامية/خلفية)
-//  - دمج/تبديل مع فيديو آخر بضغطة زر
-//  - موسيقى خلفية قابلة للتبديل مع الكلام + منزلق تضخيم الصوت
-//  - خبر ثابت أو شريط متحرك (جديد)
+//  - رفع فيديو أو تصوير مباشر بالكاميرا
+//  - تبديل مع فيديو آخر بضغطة زر
+//  - موسيقى خلفية مع Limiter لمنع التشويش
+//  - خبر ثابت أو شريط متحرك
 // ============================================================
 
 // ===== الحالة =====
@@ -482,12 +481,11 @@ let musicLoaded = false;
 let activeSource = 'file';
 let broadcast    = 'main';
 let musicOn      = false;
-let musicBoost   = 1.8;
+let musicBoost   = 1.0;        // ✅ القيمة الطبيعية (بدون تضخيم)
 let currentFacing = 'user';
 
-// ✅ الخبر (جديد)
-let newsMode = 'static';      // 'static' | 'ticker'
-let tickerSpeedFactor = 1;    // 0.5 | 1 | 2
+let newsMode = 'static';
+let tickerSpeedFactor = 1;
 let tickerX = 0;
 let tickerInited = false;
 
@@ -630,10 +628,12 @@ function pickBestMime(hasAudio) {
 
 // ============================================================
 //  نظام الصوت المختلط
+//  ✅ Limiter على مسار الموسيقى لمنع التشويش
 // ============================================================
 let audioCtx = null, audioDest = null;
 let srcMainEl = null, srcOtherEl = null, srcMusicEl = null, micNode = null;
 let gainMain = null, gainOther = null, gainMic = null, gainMusic = null;
+let musicLimiter = null;   // ✅ ضاغط صوتي يمنع تجاوز الحد
 
 function ensureAudio() {
   if (audioCtx) return audioCtx;
@@ -653,18 +653,31 @@ function ensureAudio() {
     gainOther.gain.value = 0;
     gainMic.gain.value   = 1;
     gainMusic.gain.value = 0;
-    musicBoost = 1.8;
+    musicBoost = 1.0;
 
+    // ✅ إنشاء Limiter للموسيقى
+    // يمنع التشويش حتى لو تجاوز المستوى الحد الأقصى
+    musicLimiter = audioCtx.createDynamicsCompressor();
+    musicLimiter.threshold.value = -3;     // يبدأ الحماية عند -3 dB
+    musicLimiter.knee.value = 6;           // انتقال ناعم (بدون قطع مفاجئ)
+    musicLimiter.ratio.value = 20;         // ضغط قوي (limiter)
+    musicLimiter.attack.value = 0.003;     // استجابة سريعة جداً
+    musicLimiter.release.value = 0.15;     // تحرير سلس
+
+    // الموسيقى → Gain → Limiter → التسجيل والسماعة
+    gainMusic.connect(musicLimiter);
+    musicLimiter.connect(audioDest);
+    musicLimiter.connect(audioCtx.destination);
+
+    // بقية المصادر تمر مباشرة
     gainMain.connect(audioDest);
     gainOther.connect(audioDest);
     gainMic.connect(audioDest);
-    gainMusic.connect(audioDest);
 
     gainMain.connect(audioCtx.destination);
     gainOther.connect(audioCtx.destination);
-    gainMusic.connect(audioCtx.destination);
 
-    console.log('✅ AudioContext جاهز');
+    console.log('✅ AudioContext جاهز (مع Limiter للموسيقى)');
     return audioCtx;
   } catch (e) {
     console.error('❌ فشل إنشاء AudioContext:', e);
@@ -708,7 +721,7 @@ function connectMusicEl() {
   try {
     srcMusicEl = audioCtx.createMediaElementSource(musicEl);
     srcMusicEl.connect(gainMusic);
-    console.log('🎵 ربط صوت الموسيقى');
+    console.log('🎵 ربط صوت الموسيقى (مع Limiter)');
   } catch (e) { console.warn('فشل ربط صوت الموسيقى:', e); }
 }
 
@@ -727,6 +740,7 @@ function connectMic() {
   } catch (e) { console.warn('فشل ربط الميكروفون:', e); return false; }
 }
 
+// توزيع الصوت
 function applyMix() {
   if (!audioCtx) return;
   const t = audioCtx.currentTime;
@@ -802,7 +816,7 @@ videoFileInp.addEventListener('change', e => {
 });
 
 // ============================================================
-//  الكاميرا المباشرة
+//  الكاميرا
 // ============================================================
 async function startCameraStream(facing) {
   if (cameraStream) {
@@ -831,7 +845,6 @@ async function startCameraStream(facing) {
     await new Promise(res => { camVideo.onloadedmetadata = res; });
   }
   currentFacing = facing;
-  console.log('🎥 الكاميرا تعمل الآن:', facing === 'user' ? 'أمامية' : 'خلفية');
 }
 
 btnCamOn.addEventListener('click', async function () {
@@ -878,8 +891,7 @@ btnSwitchCam.addEventListener('click', async function () {
       (newFacing === 'user' ? 'الأمامية' : 'الخلفية'));
   } catch (e) {
     console.error('Switch camera error:', e);
-    setStatus('err', '⚠️ تعذر تبديل الكاميرا: ' + (e.message || e) +
-      '<br><span style="font-size:0.8rem;">قد لا تحتوي هذه الكاميرا على كاميرا ثانية</span>');
+    setStatus('err', '⚠️ تعذر تبديل الكاميرا: ' + (e.message || e));
   } finally {
     btnSwitchCam.disabled = false;
     btnSwitchCam.textContent = oldText;
@@ -963,6 +975,7 @@ musicFileInp.addEventListener('change', e => {
   };
 });
 
+// منزلق مستوى الموسيقى
 musicVolSlider.addEventListener('input', () => {
   musicBoost = parseInt(musicVolSlider.value, 10) / 100;
   musicVolVal.textContent = musicVolSlider.value + '%';
@@ -1028,7 +1041,7 @@ logoFileInp.addEventListener('change', e => {
 });
 
 // ============================================================
-//  ✅ نمط الخبر (جديد)
+//  نمط الخبر
 // ============================================================
 newsModeButtons.addEventListener('click', e => {
   const btn = e.target.closest('button');
@@ -1132,7 +1145,6 @@ function drawPip(el, W, H) {
   ctx.restore();
 }
 
-// ✅ خبر ثابت
 function drawStaticNews(W, H) {
   const news = newsText.value.trim();
   if (!news) { canvas._newsBounds = null; return; }
@@ -1187,7 +1199,6 @@ function drawStaticNews(W, H) {
   canvas._newsBounds = { x: bx, y: by, w: bw, h: bh };
 }
 
-// ✅ شريط الأخبار المتحرك
 function drawTickerNews(W, H, dt) {
   const news = newsText.value.trim();
   if (!news) { tickerInited = false; return; }
@@ -1344,7 +1355,7 @@ canvas.addEventListener('touchend', up);
 canvas.addEventListener('touchcancel', up);
 
 // ============================================================
-//  ✅ حلقة رسم مستمرة — لتحديث الشريط المتحرك
+//  حلقة الرسم المستمرة
 // ============================================================
 function renderLoop(ts) {
   const dt = lastFrameTime ? Math.min(0.1, (ts - lastFrameTime) / 1000) : 0.033;
@@ -1374,7 +1385,7 @@ function stopTimer() {
 }
 
 // ============================================================
-//  زر التبديل بين الفيديو الرئيسي والفيديو الآخر
+//  زر التبديل
 // ============================================================
 btnSwitch.addEventListener('click', function () {
   if (!isRecording || !otherLoaded) return;
@@ -1634,8 +1645,6 @@ function finishRecording() {
 
   const isMp4 = mime.indexOf('mp4') !== -1;
   outputExt = isMp4 ? 'mp4' : 'webm';
-
-  console.log('📦 حجم الملف:', outputBlob.size, 'bytes | النوع:', mime);
 
   if (outputBlob.size < 1000) {
     setStatus('err', '⚠️ التسجيل قصير جداً');
