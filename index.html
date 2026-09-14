@@ -275,7 +275,6 @@
 
   <h1>🎬 استوديو الفيديو المتكامل</h1>
 
-  <!-- 1: مصدر الفيديو -->
   <div class="step" id="step1">
     <div class="step-title"><span class="num">1</span> الفيديو <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -297,7 +296,6 @@
     </div>
   </div>
 
-  <!-- 2: القص -->
   <div class="step collapsed" id="step2">
     <div class="step-title"><span class="num">2</span> القص <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -319,7 +317,6 @@
     </div>
   </div>
 
-  <!-- 3: مقاس الفيديو -->
   <div class="step collapsed" id="step3">
     <div class="step-title"><span class="num">3</span> مقاس الفيديو <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -340,7 +337,6 @@
     </div>
   </div>
 
-  <!-- 4: الخبر -->
   <div class="step collapsed" id="step4">
     <div class="step-title"><span class="num">4</span> الخبر <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -391,7 +387,6 @@
     </div>
   </div>
 
-  <!-- 5: الشعار والصور -->
   <div class="step collapsed" id="step5">
     <div class="step-title"><span class="num">5</span> الشعار والصور <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -433,7 +428,6 @@
     </div>
   </div>
 
-  <!-- 6: الصوت والموسيقى -->
   <div class="step collapsed" id="step6">
     <div class="step-title"><span class="num">6</span> الصوت والموسيقى <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -459,7 +453,6 @@
     </div>
   </div>
 
-  <!-- 7: الفيديو الآخر -->
   <div class="step collapsed" id="step7">
     <div class="step-title"><span class="num">7</span> الفيديو الآخر <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -469,7 +462,6 @@
     </div>
   </div>
 
-  <!-- 8: المعاينة -->
   <div class="step" id="step8">
     <div class="step-title"><span class="num">8</span> المعاينة <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -478,7 +470,6 @@
     </div>
   </div>
 
-  <!-- 9: التصدير -->
   <div class="step" id="step9">
     <div class="step-title"><span class="num">9</span> التصدير <span class="arrow">▼</span></div>
     <div class="step-body">
@@ -520,7 +511,7 @@
 
 <script>
 // ============================================================
-//  المتغيرات العامة - كلها في مكان واحد
+//  المتغيرات العامة
 // ============================================================
 let logoImg = null;
 let videoLoaded = false;
@@ -534,45 +525,36 @@ let musicOn = false;
 let currentFacing = 'user';
 let currentPhase = 'main';
 
-// القص
 let videoDuration = 0;
 let trimStartTime = 0;
 let trimEndTime = 0;
 
-// المقاس والجودة
 let aspectRatio = 'original';
 let exportQuality = 720;
 let canvasW = 640, canvasH = 360;
 let sourceAspect = 16 / 9;
 
-// السرعة
 let videoSpeed = 1;
 
-// الخبر
 let newsMode = 'static';
-let newsSize = 3;                 // ✅ الآن مُعرَّف في الأعلى
+let newsSize = 3;
 let tickerSpeedFactor = 1;
 let tickerX = 0;
 let tickerInited = false;
 
-// الأصوات
 let videoVolume = 1;
 let micVolume = 1;
 let musicBoost = 1.8;
 
-// الصور الإضافية
 let overlays = [];
 let overlayIdCounter = 0;
 
-// افتتاحية/ختامية
 let introImg = null, introDuration = 2;
 let outroImg = null, outroDuration = 2;
 
-// المعاينة
 let isDragging = null;
 let dragOff = { x: 0, y: 0 };
 
-// التسجيل
 let isRecording = false;
 let mediaRecorder = null;
 let recordedChunks = [];
@@ -587,11 +569,10 @@ let recordStartTime = 0;
 let introTimeoutId = null;
 let lastFrameTime = 0;
 
-// موضع النص والشعار
 let newsX = 0.5, newsY = 0.85;
 let logoX = 0.5, logoY = 0.15;
 
-// ===== عناصر فيديو/صوت مخفية =====
+// عناصر فيديو/صوت مخفية
 const video = document.createElement('video');
 video.playsInline = true;
 video.volume = 1;
@@ -620,7 +601,6 @@ musicEl.crossOrigin = 'anonymous';
   document.body.appendChild(v);
 });
 
-// ===== عناصر الواجهة =====
 const $ = id => document.getElementById(id);
 
 const sourceButtons = $('sourceButtons');
@@ -723,30 +703,23 @@ function ensureAudio() {
   try {
     audioCtx = new AC();
     audioDest = audioCtx.createMediaStreamDestination();
-
     gainMain  = audioCtx.createGain();
     gainOther = audioCtx.createGain();
     gainMic   = audioCtx.createGain();
     gainMusic = audioCtx.createGain();
-
     gainMain.gain.value  = videoVolume;
     gainOther.gain.value = 0;
     gainMic.gain.value   = micVolume;
     gainMusic.gain.value = 0;
-
     gainMain.connect(audioDest);
     gainOther.connect(audioDest);
     gainMic.connect(audioDest);
     gainMusic.connect(audioDest);
-
     gainMain.connect(audioCtx.destination);
     gainOther.connect(audioCtx.destination);
     gainMusic.connect(audioCtx.destination);
     return audioCtx;
-  } catch (e) {
-    audioCtx = null;
-    return null;
-  }
+  } catch (e) { audioCtx = null; return null; }
 }
 function resumeAudio() {
   const c = ensureAudio();
@@ -755,24 +728,15 @@ function resumeAudio() {
 }
 function connectMainEl() {
   if (!ensureAudio() || srcMainEl) return;
-  try {
-    srcMainEl = audioCtx.createMediaElementSource(video);
-    srcMainEl.connect(gainMain);
-  } catch (e) {}
+  try { srcMainEl = audioCtx.createMediaElementSource(video); srcMainEl.connect(gainMain); } catch (e) {}
 }
 function connectOtherEl() {
   if (!ensureAudio() || srcOtherEl) return;
-  try {
-    srcOtherEl = audioCtx.createMediaElementSource(otherVideo);
-    srcOtherEl.connect(gainOther);
-  } catch (e) {}
+  try { srcOtherEl = audioCtx.createMediaElementSource(otherVideo); srcOtherEl.connect(gainOther); } catch (e) {}
 }
 function connectMusicEl() {
   if (!ensureAudio() || srcMusicEl) return;
-  try {
-    srcMusicEl = audioCtx.createMediaElementSource(musicEl);
-    srcMusicEl.connect(gainMusic);
-  } catch (e) {}
+  try { srcMusicEl = audioCtx.createMediaElementSource(musicEl); srcMusicEl.connect(gainMusic); } catch (e) {}
 }
 function connectMic() {
   if (!ensureAudio() || !cameraStream) return false;
@@ -792,16 +756,12 @@ function applyMix() {
   const otherOn = (broadcast === 'other') ? 1 : 0;
   const micOn   = (broadcast === 'main' && !musicOn && currentPhase === 'main') ? micVolume : 0;
   const musLvl  = (broadcast === 'main' && musicOn) ? musicBoost : 0;
-
   if (gainMain)  gainMain.gain.setTargetAtTime(mainOn * videoVolume, t, 0.05);
   if (gainMic)   gainMic.gain.setTargetAtTime(micOn, t, 0.05);
   if (gainOther) gainOther.gain.setTargetAtTime(otherOn, t, 0.05);
   if (gainMusic) gainMusic.gain.setTargetAtTime(musLvl, t, 0.08);
 }
 
-// ============================================================
-//  اختيار الصيغة
-// ============================================================
 function pickBestMime(hasAudio) {
   if (typeof MediaRecorder === 'undefined') return { mime: '', ext: 'webm' };
   const withAudio = [
@@ -835,18 +795,10 @@ function pickBestMime(hasAudio) {
   return { mime: '', ext: 'webm' };
 }
 
-// ============================================================
-//  طي الأقسام
-// ============================================================
 document.querySelectorAll('.step-title').forEach(t => {
-  t.addEventListener('click', () => {
-    t.parentElement.classList.toggle('collapsed');
-  });
+  t.addEventListener('click', () => t.parentElement.classList.toggle('collapsed'));
 });
 
-// ============================================================
-//  resize canvas + refresh button
-// ============================================================
 function computeCanvasSize() {
   const q = exportQuality;
   let w, h;
@@ -863,7 +815,6 @@ function computeCanvasSize() {
   if (h < 2) h = 2;
   return { w, h };
 }
-
 function updateCanvasSize() {
   const size = computeCanvasSize();
   canvasW = size.w;
@@ -873,12 +824,11 @@ function updateCanvasSize() {
   sizeInfo.innerHTML = 'الحجم: <b>' + canvasW + '×' + canvasH + '</b> — الجودة: <b>' +
     exportQuality + 'p</b> — النسبة: <b>' + aspectRatio + '</b>';
 }
-
 function refreshStartBtn() {
   try {
     const ready = (activeSource === 'file') ? videoLoaded : cameraReady;
     btnStart.disabled = !ready || isRecording;
-  } catch (e) { console.error('refreshStartBtn error', e); }
+  } catch (e) { console.error(e); }
 }
 
 // ============================================================
@@ -900,8 +850,6 @@ sourceButtons.addEventListener('click', e => {
 videoFileInp.addEventListener('change', e => {
   const f = e.target.files[0];
   if (!f) return;
-
-  // اضبط المعالج قبل التحميل
   video.onloadedmetadata = () => {
     videoLoaded = true;
     try { video.currentTime = 0; } catch (e) {}
@@ -909,7 +857,6 @@ videoFileInp.addEventListener('change', e => {
     videoDuration = video.duration || 0;
     trimStartTime = 0;
     trimEndTime = videoDuration;
-
     trimStart.max = videoDuration || 100;
     trimEnd.max = videoDuration || 100;
     trimStart.value = 0;
@@ -917,68 +864,150 @@ videoFileInp.addEventListener('change', e => {
     trimHint.style.display = 'none';
     trimControls.style.display = 'block';
     updateTrimDisplay();
-
     videoInfo.style.display = 'block';
     videoInfo.innerHTML = '✅ الفيديو: <b>' + video.videoWidth + '×' + video.videoHeight +
       '</b> — المدة: <b>' + fmtTime(videoDuration) + '</b>';
-
     updateCanvasSize();
     refreshStartBtn();
     redraw(0);
-    setStatus('ok', '✅ الفيديو جاهز — انتقل للخطوة 2 للقص أو 9 للتسجيل');
+    setStatus('ok', '✅ الفيديو جاهز');
   };
   video.onerror = () => setStatus('err', '⚠️ خطأ في صيغة الفيديو');
-
   try {
     if (video.src) URL.revokeObjectURL(video.src);
     video.src = URL.createObjectURL(f);
     video.load();
-  } catch (err) {
-    setStatus('err', '⚠️ خطأ في تحميل الفيديو');
-  }
+  } catch (err) { setStatus('err', '⚠️ خطأ في تحميل الفيديو'); }
 });
 
+// ============================================================
+//  ✅ دالة الكاميرا المُصلَّحة — محاولات متدرجة
+// ============================================================
 async function startCameraStream(facing) {
   if (cameraStream) {
     try { cameraStream.getTracks().forEach(t => t.stop()); } catch (e) {}
     cameraStream = null;
   }
+
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    throw new Error('المتصفح لا يدعم الكاميرا');
+    throw new Error('المتصفح لا يدعم الكاميرا. تأكد من فتح الصفحة عبر HTTPS أو localhost.');
   }
-  const constraints = {
-    video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
-    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
-  };
-  cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+  // محاولات متدرجة — من الأدق إلى الأبسط
+  const attempts = [
+    {
+      video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+    },
+    {
+      video: { facingMode: { ideal: facing }, width: { ideal: 640 }, height: { ideal: 480 } },
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+    },
+    {
+      video: { facingMode: facing },
+      audio: true
+    },
+    {
+      video: true,
+      audio: true
+    },
+    {
+      video: true,
+      audio: false
+    }
+  ];
+
+  let lastErr = null;
+  let usedAudio = true;
+
+  for (let i = 0; i < attempts.length; i++) {
+    const constraints = attempts[i];
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+      usedAudio = !!(constraints.audio);
+      lastErr = null;
+      console.log('✅ نجحت محاولة الكاميرا رقم', i + 1);
+      break;
+    } catch (err) {
+      lastErr = err;
+      console.warn('⚠️ فشلت محاولة ' + (i + 1) + ':', err.name, err.message);
+
+      // أخطاء قاتلة — لا فائدة من إعادة المحاولة
+      if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
+        throw new Error('تم رفض الوصول للكاميرا/الميكروفون. اذهب إلى إعدادات المتصفح وامنح الإذن لهذا الموقع.');
+      }
+      if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        throw new Error('لا توجد كاميرا أو ميكروفون متصل بهذا الجهاز.');
+      }
+      if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        // قد تكون مشكلة مؤقتة — استمر بالمحاولات
+        continue;
+      }
+      // أي خطأ آخر — استمر بالمحاولة الأبسط
+    }
+  }
+
+  if (!cameraStream) {
+    let msg = 'فشل تشغيل الكاميرا.';
+    if (lastErr) {
+      if (lastErr.name === 'NotReadableError' || lastErr.name === 'TrackStartError') {
+        msg += ' الكاميرا مستخدمة من تطبيق آخر — أغلق التطبيقات الأخرى (Zoom، Teams، الكاميرا، إلخ) وأعد المحاولة.';
+      } else {
+        msg += ' ' + (lastErr.message || lastErr.name);
+      }
+    }
+    msg += ' تأكد أن الصفحة مفتوحة عبر HTTPS وأن المتصفح يدعم الكاميرا.';
+    throw new Error(msg);
+  }
+
   camVideo.srcObject = cameraStream;
   camVideo.muted = true;
-  await camVideo.play();
+
+  try { await camVideo.play(); } catch (e) {}
+
   if (!camVideo.videoWidth) {
-    await new Promise(res => { camVideo.onloadedmetadata = res; });
+    await new Promise(res => {
+      const t = setTimeout(res, 2000);
+      camVideo.onloadedmetadata = () => { clearTimeout(t); res(); };
+    });
   }
+
   currentFacing = facing;
+  console.log('🎥 الكاميرا تعمل:', facing === 'user' ? 'أمامية' : 'خلفية',
+    '| صوت:', usedAudio ? 'نعم' : 'لا');
+
+  return { hasAudio: usedAudio && cameraStream.getAudioTracks().length > 0 };
 }
 
 btnCamOn.addEventListener('click', async function () {
+  btnCamOn.disabled = true;
+  btnCamOn.textContent = '⏳ جاري التشغيل...';
   try {
-    setStatus('busy', '⏳ جاري تشغيل الكاميرا...');
-    await startCameraStream('user');
+    setStatus('busy', '⏳ جاري تشغيل الكاميرا... (قد يطلب المتصفح الإذن)');
+    const result = await startCameraStream('user');
+
     cameraReady = true;
     sourceAspect = (camVideo.videoWidth || 16) / (camVideo.videoHeight || 9);
     updateCanvasSize();
+
     resumeAudio();
-    connectMic();
+    if (result.hasAudio) connectMic();
     applyMix();
+
     btnCamOn.style.display = 'none';
     camControls.style.display = 'grid';
     refreshStartBtn();
     redraw(0);
-    const hasMic = cameraStream.getAudioTracks().length > 0;
-    setStatus('ok', '✅ الكاميرا جاهزة' + (hasMic ? ' مع الميكروفون 🎤' : '') + ' — اضغط 📤 للبدء');
+
+    setStatus('ok', '✅ الكاميرا جاهزة' +
+      (result.hasAudio ? ' مع الميكروفون 🎤' : ' (بدون ميكروفون)') +
+      ' — اضغط 📤 للبدء');
   } catch (e) {
-    console.error(e);
-    setStatus('err', '⚠️ تعذر تشغيل الكاميرا: ' + (e.message || e));
+    console.error('Camera error:', e);
+    setStatus('err', '⚠️ ' + (e.message || e));
+  } finally {
+    btnCamOn.disabled = false;
+    btnCamOn.textContent = '🎥 تشغيل الكاميرا والميكروفون';
   }
 });
 
@@ -989,14 +1018,15 @@ btnSwitchCam.addEventListener('click', async function () {
   const oldText = btnSwitchCam.textContent;
   btnSwitchCam.textContent = '⏳ جاري التبديل...';
   try {
-    await startCameraStream(newFacing);
-    if (audioCtx) { connectMic(); applyMix(); }
+    const result = await startCameraStream(newFacing);
+    if (audioCtx && result.hasAudio) { connectMic(); applyMix(); }
     sourceAspect = (camVideo.videoWidth || 16) / (camVideo.videoHeight || 9);
     updateCanvasSize();
     redraw(0);
     setStatus('ok', '✅ تم التبديل إلى الكاميرا ' + (newFacing === 'user' ? 'الأمامية' : 'الخلفية'));
   } catch (e) {
-    setStatus('err', '⚠️ تعذر تبديل الكاميرا: ' + (e.message || e));
+    console.error('Switch error:', e);
+    setStatus('err', '⚠️ ' + (e.message || e));
   } finally {
     btnSwitchCam.disabled = false;
     btnSwitchCam.textContent = oldText;
@@ -1010,9 +1040,7 @@ btnCamOff.addEventListener('click', function () {
 });
 
 function stopCamera() {
-  try {
-    if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
-  } catch (e) {}
+  try { if (cameraStream) cameraStream.getTracks().forEach(t => t.stop()); } catch (e) {}
   cameraStream = null;
   cameraReady = false;
   camVideo.srcObject = null;
@@ -1079,7 +1107,6 @@ newsText.addEventListener('input', () => {
   tickerInited = false;
   redraw(0);
 });
-
 newsModeButtons.addEventListener('click', e => {
   const btn = e.target.closest('button');
   if (!btn) return;
@@ -1091,7 +1118,6 @@ newsModeButtons.addEventListener('click', e => {
   tickerInited = false;
   redraw(0);
 });
-
 tickerSpeedButtons.addEventListener('click', e => {
   const btn = e.target.closest('button');
   if (!btn) return;
@@ -1099,7 +1125,6 @@ tickerSpeedButtons.addEventListener('click', e => {
   btn.classList.add('active');
   tickerSpeedFactor = parseFloat(btn.dataset.speed);
 });
-
 sizeButtons.addEventListener('click', e => {
   const btn = e.target.closest('button');
   if (!btn) return;
@@ -1108,7 +1133,6 @@ sizeButtons.addEventListener('click', e => {
   newsSize = parseInt(btn.dataset.size);
   redraw(0);
 });
-
 const POS_MAP = {
   top:         { x: 0.5, y: 0.15 },
   middle:      { x: 0.5, y: 0.5 },
@@ -1126,7 +1150,6 @@ posButtons.addEventListener('click', e => {
   newsX = p.x; newsY = p.y;
   redraw(0);
 });
-
 speedButtons.addEventListener('click', e => {
   const btn = e.target.closest('button');
   if (!btn) return;
@@ -1331,7 +1354,6 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
     return this;
   };
 }
-
 function drawCover(el, W, H) {
   const vw = el.videoWidth, vh = el.videoHeight;
   if (!vw || !vh) return false;
@@ -1349,7 +1371,6 @@ function drawImageCover(img, W, H) {
   else         { dh = H; dw = H * ia; dx = (W - dw) / 2; dy = 0; }
   try { ctx.drawImage(img, dx, dy, dw, dh); return true; } catch (e) { return false; }
 }
-
 function drawLogo(W, H) {
   if (!logoImg || !logoImg.width) { canvas._logoBounds = null; return; }
   const lw = W * 0.18;
@@ -1365,7 +1386,6 @@ function drawLogo(W, H) {
   ctx.restore();
   canvas._logoBounds = { x: lx, y: ly, w: lw, h: lh };
 }
-
 function drawOverlays(W, H) {
   canvas._overlayBounds = [];
   overlays.forEach((o, i) => {
@@ -1378,7 +1398,6 @@ function drawOverlays(W, H) {
     canvas._overlayBounds.push({ x: ox, y: oy, w: ow, h: oh, index: i });
   });
 }
-
 function drawStaticNews(W, H) {
   const news = newsText.value.trim();
   if (!news) { canvas._newsBounds = null; return; }
@@ -1387,7 +1406,6 @@ function drawStaticNews(W, H) {
   ctx.font = `900 ${fs}px Cairo, Tahoma, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-
   const maxWidth = W * 0.9;
   const words = news.split(' ');
   const lines = [];
@@ -1398,7 +1416,6 @@ function drawStaticNews(W, H) {
     else line = test;
   }
   if (line) lines.push(line);
-
   const lineH = fs * 1.3;
   const totalH = lines.length * lineH;
   const boxX = newsX * W;
@@ -1406,13 +1423,11 @@ function drawStaticNews(W, H) {
   const startY = boxY - totalH / 2 + lineH / 2;
   let maxLineW = 0;
   for (const l of lines) maxLineW = Math.max(maxLineW, ctx.measureText(l).width);
-
   const padX = 20, padY = 12;
   const bx = boxX - maxLineW / 2 - padX;
   const by = boxY - totalH / 2 - padY;
   const bw = maxLineW + padX * 2;
   const bh = totalH + padY * 2;
-
   ctx.fillStyle = 'rgba(0,0,0,0.7)';
   ctx.beginPath();
   ctx.roundRect(bx, by, bw, bh, 12);
@@ -1420,16 +1435,13 @@ function drawStaticNews(W, H) {
   ctx.strokeStyle = '#00FF00';
   ctx.lineWidth = 3;
   ctx.stroke();
-
   ctx.fillStyle = '#00FF00';
   ctx.shadowBlur = 12;
   ctx.shadowColor = '#00FF00';
   lines.forEach((l, i) => ctx.fillText(l, boxX, startY + i * lineH));
   ctx.shadowBlur = 0;
-
   canvas._newsBounds = { x: bx, y: by, w: bw, h: bh };
 }
-
 function drawTickerNews(W, H, dt) {
   const news = newsText.value.trim();
   if (!news) return;
@@ -1438,14 +1450,11 @@ function drawTickerNews(W, H, dt) {
   ctx.font = `900 ${fs}px Cairo, Tahoma, sans-serif`;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
-
   const textW = ctx.measureText(news).width;
   if (!tickerInited) { tickerX = W + 30; tickerInited = true; }
-
   const y = newsY * H;
   const bgH = fs * 1.8;
   const top = y - bgH / 2;
-
   ctx.fillStyle = 'rgba(0,0,0,0.75)';
   ctx.fillRect(0, top, W, bgH);
   ctx.strokeStyle = '#00FF00';
@@ -1454,17 +1463,14 @@ function drawTickerNews(W, H, dt) {
   ctx.moveTo(0, top); ctx.lineTo(W, top);
   ctx.moveTo(0, top + bgH); ctx.lineTo(W, top + bgH);
   ctx.stroke();
-
   tickerX -= (W * 0.25 * tickerSpeedFactor) * (dt || 0.016);
   if (tickerX < -textW - 30) tickerX = W + 30;
-
   ctx.fillStyle = '#00FF00';
   ctx.shadowBlur = 10;
   ctx.shadowColor = '#00FF00';
   ctx.fillText(news, tickerX, y);
   ctx.shadowBlur = 0;
 }
-
 function drawTickerOrNews(W, H, dt) {
   if (newsMode === 'ticker') {
     drawTickerNews(W, H, dt || 0);
@@ -1473,7 +1479,6 @@ function drawTickerOrNews(W, H, dt) {
     drawStaticNews(W, H);
   }
 }
-
 function drawPip(el, W, H) {
   if (!el.videoWidth) return;
   const pw = W * 0.24;
@@ -1494,15 +1499,12 @@ function drawPip(el, W, H) {
   ctx.stroke();
   ctx.restore();
 }
-
 function redraw(dt) {
   const W = canvas.width, H = canvas.height;
   if (!W || !H) return;
-
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, W, H);
 
-  // افتتاحية/ختامية
   if (currentPhase === 'intro' && introImg) {
     drawImageCover(introImg, W, H);
     drawTickerOrNews(W, H, dt);
@@ -1525,7 +1527,6 @@ function redraw(dt) {
       if (videoLoaded && video.readyState >= 2) drew = drawCover(video, W, H);
     }
   }
-
   if (!drew) {
     ctx.fillStyle = '#5a7a9a';
     ctx.font = `${Math.min(20, W * 0.03)}px Cairo, sans-serif`;
@@ -1536,15 +1537,11 @@ function redraw(dt) {
       W / 2, H / 2
     );
   }
-
   drawOverlays(W, H);
   drawLogo(W, H);
   drawTickerOrNews(W, H, dt);
 }
 
-// ============================================================
-//  السحب
-// ============================================================
 function getPt(e) {
   const r = canvas.getBoundingClientRect();
   const sx = canvas.width / r.width;
@@ -1621,16 +1618,11 @@ canvas.addEventListener('touchmove', move, { passive: false });
 canvas.addEventListener('touchend', up);
 canvas.addEventListener('touchcancel', up);
 
-// ============================================================
-//  حلقة العرض
-// ============================================================
 function renderLoop(ts) {
   const dt = lastFrameTime ? Math.min(0.1, (ts - lastFrameTime) / 1000) : 0.016;
   lastFrameTime = ts;
-
   const needsAnim = (newsMode === 'ticker' && newsText.value.trim()) || isRecording;
   if (needsAnim) redraw(dt);
-
   if (isRecording && currentPhase === 'main' && broadcast === 'main') {
     if (activeSource === 'file' && videoLoaded && trimEndTime > 0) {
       if (video.currentTime >= trimEndTime) {
@@ -1639,13 +1631,9 @@ function renderLoop(ts) {
       }
     }
   }
-
   animFrame = requestAnimationFrame(renderLoop);
 }
 
-// ============================================================
-//  المؤقّت
-// ============================================================
 function startTimer() {
   recordStartTime = Date.now();
   timerEl.classList.add('show');
@@ -1660,9 +1648,6 @@ function stopTimer() {
   timerEl.classList.remove('show');
 }
 
-// ============================================================
-//  أزرار التبديل
-// ============================================================
 btnSwitch.addEventListener('click', function () {
   if (!isRecording || !otherLoaded) return;
   if (broadcast === 'main') {
@@ -1679,7 +1664,6 @@ btnSwitch.addEventListener('click', function () {
     switchBackToMain();
   }
 });
-
 function switchBackToMain() {
   broadcast = 'main';
   try { otherVideo.pause(); } catch (e) {}
@@ -1691,7 +1675,6 @@ function switchBackToMain() {
   updateSwitchUI();
   if (isRecording) setStatus('busy', '🔴 جاري التسجيل — أنت على البث الآن 🎤');
 }
-
 function updateSwitchUI() {
   if (broadcast === 'other') {
     btnSwitch.textContent = '🎤 العودة للبث المباشر';
@@ -1703,7 +1686,6 @@ function updateSwitchUI() {
     btnSwitch.classList.add('btn-orange');
   }
 }
-
 btnMusic.addEventListener('click', function () {
   if (!isRecording || !musicLoaded) return;
   if (!musicOn) {
@@ -1724,7 +1706,6 @@ btnMusic.addEventListener('click', function () {
     if (isRecording) setStatus('busy', '🔴 جاري التسجيل — الصوت من الميكروفون 🎤');
   }
 });
-
 function updateMusicUI() {
   if (musicOn) {
     btnMusic.textContent = '🎤 العودة للكلام';
@@ -1741,30 +1722,21 @@ function updateMusicUI() {
   }
 }
 
-// ============================================================
-//  بدء التسجيل
-// ============================================================
 btnStart.addEventListener('click', function () {
-  console.log('BTN START clicked. isRecording=', isRecording, 'activeSource=', activeSource,
-    'videoLoaded=', videoLoaded, 'cameraReady=', cameraReady);
-
   if (isRecording) return;
-
   if (typeof MediaRecorder === 'undefined') {
-    setStatus('err', '⚠️ المتصفح لا يدعم MediaRecorder — جرّب Chrome أو Safari حديث');
+    setStatus('err', '⚠️ المتصفح لا يدعم MediaRecorder');
     return;
   }
   if (!canvas.captureStream) {
     setStatus('err', '⚠️ المتصفح لا يدعم captureStream');
     return;
   }
-
   const ready = (activeSource === 'file') ? videoLoaded : cameraReady;
   if (!ready) { setStatus('err', '⚠️ اختر مصدر الفيديو أولاً'); return; }
 
   try {
     resumeAudio();
-
     if (activeSource === 'file') {
       video.muted = false;
       video.volume = 1;
@@ -1870,7 +1842,6 @@ btnStart.addEventListener('click', function () {
     } else {
       startMainPhase();
     }
-
   } catch (e) {
     console.error('Start error:', e);
     setStatus('err', '⚠️ خطأ في بدء التسجيل: ' + (e.message || e));
@@ -1886,7 +1857,6 @@ btnStart.addEventListener('click', function () {
 function startMainPhase() {
   currentPhase = 'main';
   applyMix();
-
   if (activeSource === 'file') {
     try { video.currentTime = trimStartTime || 0; } catch (e) {}
     const p = video.play();
@@ -1897,7 +1867,6 @@ function startMainPhase() {
     });
   }
 }
-
 function transitionAfterMain() {
   if (outroImg) {
     currentPhase = 'outro';
@@ -1908,33 +1877,22 @@ function transitionAfterMain() {
   }
 }
 
-// ============================================================
-//  إيقاف التسجيل
-// ============================================================
 btnStop.addEventListener('click', () => stopRecording());
-
 function stopRecording() {
   if (!isRecording) return;
   isRecording = false;
-
   if (introTimeoutId) { clearTimeout(introTimeoutId); introTimeoutId = null; }
   stopTimer();
-
   try {
     if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
-  } catch (e) {
-    finishRecording();
-  }
-
+  } catch (e) { finishRecording(); }
   try { video.pause(); } catch (e) {}
   try { otherVideo.pause(); } catch (e) {}
   try { musicEl.pause(); } catch (e) {}
-
   broadcast = 'main';
   musicOn = false;
   currentPhase = 'main';
   applyMix();
-
   btnStop.style.display = 'none';
   btnStop.disabled = true;
   switchRow.style.display = 'none';
@@ -1945,45 +1903,30 @@ function stopRecording() {
 }
 
 video.addEventListener('ended', () => {
-  if (isRecording && currentPhase === 'main' && broadcast === 'main') {
-    transitionAfterMain();
-  }
+  if (isRecording && currentPhase === 'main' && broadcast === 'main') transitionAfterMain();
 });
 
-// ============================================================
-//  تجهيز الملف
-// ============================================================
 function finishRecording() {
   if (!recordedChunks || recordedChunks.length === 0) {
-    setStatus('err', '⚠️ لم يتم تسجيل أي بيانات — جرّب مرة أخرى');
+    setStatus('err', '⚠️ لم يتم تسجيل أي بيانات');
     return;
   }
   const mime = (mediaRecorder && mediaRecorder.mimeType) || pickMime || 'video/webm';
   const isMp4 = mime.indexOf('mp4') !== -1;
   outputExt = isMp4 ? 'mp4' : 'webm';
-
   outputBlob = new Blob(recordedChunks, { type: mime });
-
-  if (outputBlob.size < 1000) {
-    setStatus('err', '⚠️ التسجيل قصير جداً');
-    return;
-  }
-
+  if (outputBlob.size < 1000) { setStatus('err', '⚠️ التسجيل قصير جداً'); return; }
   const sizeMB = (outputBlob.size / (1024 * 1024)).toFixed(2);
   resultInfo.innerHTML =
     '✅ <b>تم التصدير بنجاح</b><br>' +
     'الحجم: <b>' + sizeMB + ' ميجابايت</b><br>' +
     'الصيغة: <b>' + outputExt.toUpperCase() + '</b>' +
-    (isMp4 ? '' : '<br><span style="color:#ffc107;">ملاحظة: متصفحك لا يدعم MP4 — الناتج WebM ويعمل في معظم المشغلات الحديثة.</span>') +
+    (isMp4 ? '' : '<br><span style="color:#ffc107;">ملاحظة: متصفحك لا يدعم MP4 — الناتج WebM.</span>') +
     '<br>الأبعاد: <b>' + canvasW + '×' + canvasH + '</b>';
-
   resultBox.style.display = 'block';
   setStatus('ok', '✅ الفيديو جاهز — اضغط زر التحميل');
 }
 
-// ============================================================
-//  التحميل
-// ============================================================
 btnDownload.addEventListener('click', function () {
   if (!outputBlob) { setStatus('err', '⚠️ لا يوجد ملف جاهز'); return; }
   try {
@@ -2009,9 +1952,6 @@ btnDownload.addEventListener('click', function () {
   }
 });
 
-// ============================================================
-//  إنشاء فيديو جديد
-// ============================================================
 btnNewVideo.addEventListener('click', function () {
   if (!confirm('سيتم مسح التسجيل الحالي والبدء من جديد. متابعة؟')) return;
   outputBlob = null;
@@ -2019,12 +1959,9 @@ btnNewVideo.addEventListener('click', function () {
   resultBox.style.display = 'none';
   btnStart.style.display = 'flex';
   refreshStartBtn();
-  setStatus('', '✅ جاهز لفيديو جديد — اضغط 📤 لبدء التسجيل');
+  setStatus('', '✅ جاهز لفيديو جديد');
 });
 
-// ============================================================
-//  التهيئة
-// ============================================================
 updateCanvasSize();
 refreshStartBtn();
 redraw(0);
